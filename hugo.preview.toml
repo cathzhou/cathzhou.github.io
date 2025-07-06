@@ -1,7 +1,7 @@
-baseURL = "https://g1en.site"
-defaultContentLanguage = "zh"
-languageCode = "zh-Hans"
-title = "g1eny0ung's Blog"
+baseURL = "https://cathzhou.github.io"
+defaultContentLanguage = "en"
+languageCode = "en"
+title = "Catherine Zhou's Personal Website"
 theme = "dream"
 
 enableGitInfo = true
@@ -11,7 +11,7 @@ hasCJKLanguage = true
 
 # [services]
 # [services.disqus]
-# shortname = "g1eny0ung"
+# shortname = "cathzhou"
 # [services.googleAnalytics]
 # ID = "G-K6V0YY3HWS"
 
@@ -44,11 +44,11 @@ darkTheme = "forest"
 
 images = ["img/global-background.jpg"]
 
-author = "g1eny0ung"
-description = "The life record of g1eny0ung is presented here."
+author = "Catherine Zhou"
+description = "This is Catherine Zhou's Personal Website"
 avatar = "img/personal/avatar.jpg"
-headerTitle = "g1eny0ung's Blog"
-motto = "与其感慨路难行，不如马上出发。"
+headerTitle = "Catherine Zhou's Personal Website"
+motto = "do you ever feel like a plastic bag."
 
 # footerBottomText = ""
 
@@ -63,9 +63,9 @@ rss = true
 # waline = true
 # walineServer = ""
 
-email = "g1enyy0ung@gmail.com"
+email = "catherineyaozhou@gmail.com"
 
-siteStartYear = 2016
+siteStartYear = 20
 
 favicon = '<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2210 0 100 100%22><text y=%22.90em%22 font-size=%2290%22>🌱</text></svg>"></link>'
 
@@ -91,5 +91,4 @@ customCSS = ["css/custom.css"]
 
 [params.experimental]
 jsDate = true
-jsDateFormat = "yyyy年MM月dd日"
-# jsDateFormat = "yyyy年MM月dd日，cccc"
+jsDateFormat = "MM/dd/yyyy"
