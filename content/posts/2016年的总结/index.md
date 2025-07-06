@@ -1,7 +1,7 @@
 ---
 title: 2016年的总结
-date: 2016-12-30T22:36:49+08:00
-author: Yue Yang
+date: 2025
+author: Catherine Zhou
 cover: 2016年的总结.jpg
 images:
   - 2016年的总结.jpg
