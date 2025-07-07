@@ -36,8 +36,8 @@ noClasses = false
 # series = "series"
 
 [params]
-lightTheme = "emerald"
-darkTheme = "forest"
+lightTheme = "winter"
+darkTheme = "night"
 
 # backgroundImage = "img/global-background.jpg"
 # backgroundImageDark = ""
@@ -48,7 +48,7 @@ author = "Catherine Zhou"
 description = "This is Catherine Zhou's Personal Website"
 avatar = "img/personal/avatar.jpg"
 headerTitle = "Catherine Zhou's Personal Website"
-motto = "A collection of my projects, professional experiences, hobbies, and contributions in research, data science, leadership, and community service."
+motto = "A collection of my projects, experiences, and hobbies."
 
 # footerBottomText = ""
 

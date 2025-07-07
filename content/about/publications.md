@@ -2,7 +2,7 @@
 title: Publications & Presentations
 ---
 
-## Publications
+### Publications
 
 1. Ocón, B. et al. "A lymphocyte chemoaffinity axis for lung, non-intestinal mucosae and CNS." *Nature* (2024).  
    [https://doi.org/10.1038/s41586-024-08043-2](https://doi.org/10.1038/s41586-024-08043-2)
@@ -10,7 +10,7 @@ title: Publications & Presentations
 2. Kocalar, S. et al. "Hammett linear free-energy relationships in the biocatalytic hydrolysis of para-substituted nitrophenyl benzoate esters." *Journal of Emerging Investigators* (2021).  
    [https://doi.org/10.59720/21-040](https://doi.org/10.59720/21-040)
 
-## Conference Presentations
+### Conference Presentations
 
 ### Posters
 
@@ -25,5 +25,9 @@ title: Publications & Presentations
 ### Oral Presentations
 
 1. "Using machine learning methods to explore significant alternative splicing events in murine melanoma with single cell RNA-seq data"  
+   *International Conference on Intelligent Systems for Molecular Biology (ISMB) 2022*  
+   Madison, WI, USA, July 10-14, 2022 
+
+2. "Using machine learning methods to explore significant alternative splicing events in murine melanoma with single cell RNA-seq data"  
    *International Conference on Intelligent Systems for Molecular Biology (ISMB) 2022*  
    Madison, WI, USA, July 10-14, 2022 
