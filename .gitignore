@@ -6,6 +6,7 @@ public
 # themes
 themes/*
 !themes/.gitkeep
+!themes/dream
 
 # hugo
 resources

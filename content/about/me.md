@@ -1,8 +1,20 @@
 ---
-title: 关于我
-date: 2019-11-11T01:30:24+08:00
+title: About Me
 ---
 
-Hi，这里是 **g1eny0ung** 的博客。**g1eny0ung**（或 **g1en**）是我在互联网上经常使用的名字。
+# Catherine Zhou
 
-我是一个热衷于开源的软件工程师，在这里我会记录一些关于技术或者生活上的事情。欢迎你通过评论或者邮件与我交流。
+I'm a Computer Science student at Rice University with a minor in Biochemistry/Cell Biology. I like combining my passion for technology with healthcare and scientific research. I also like art and video editing!
+
+## Contact
+- Email: [cz68@rice.edu](mailto:cz68@rice.edu)
+- Phone: 408-761-1678
+- LinkedIn: [linkedin.com/in/catherineyzhou](https://linkedin.com/in/catherineyzhou)
+- GitHub: [github.com/cathzhou](https://github.com/cathzhou)
+
+## Quick Links
+- [Education & Awards](/about/education)
+- [Research Experience](/about/research)
+- [Leadership & Service](/about/leadership)
+- [Technical Skills](/about/skills)
+- [Publications](/about/publications)
