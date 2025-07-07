@@ -2,7 +2,11 @@
 title: "Data-Driven Healthcare: Leading Analytics for Nonprofit Impact"
 date: 2025-05-01
 description: "Leading data analysis projects at Biokind Analytics to support Texas healthcare nonprofits."
+cover: /biokind-analytics/biokind-analytics.png
 ---
+
+> [!IMPORTANT]
+> Key information users need to know to achieve their goal.
 
 As Team Lead and Analyst at Biokind Analytics at Rice, I've been working at the intersection of data science and healthcare, helping nonprofits make data-driven decisions to improve their community impact.
 
