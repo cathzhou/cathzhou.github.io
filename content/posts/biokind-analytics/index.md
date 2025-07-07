@@ -1,6 +1,6 @@
 ---
 title: "Data-Driven Healthcare: Leading Analytics for Nonprofit Impact"
-date: 2024-03-19
+date: 2025-05-01
 description: "Leading data analysis projects at Biokind Analytics to support Texas healthcare nonprofits."
 ---
 
