@@ -28,6 +28,6 @@ title: Publications & Presentations
    *International Conference on Intelligent Systems for Molecular Biology (ISMB) 2022*  
    Madison, WI, USA, July 10-14, 2022 
 
-2. "Using machine learning methods to explore significant alternative splicing events in murine melanoma with single cell RNA-seq data"  
-   *International Conference on Intelligent Systems for Molecular Biology (ISMB) 2022*  
-   Madison, WI, USA, July 10-14, 2022 
+2. "A Novel Computational Pipeline for the Functional Characterization and Deorphanization of G-Protein Coupled Receptors"  
+   *International Conference on Intelligent Systems for Molecular Biology (ISMB) 2025*  
+   Liverpool, UK, July 20-24, 2025

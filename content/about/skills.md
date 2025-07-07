@@ -2,18 +2,14 @@
 title: Technical Skills
 ---
 
-## Programming & Development
-
 ### Languages
 Java, Python, C/C++, JavaScript, TypeScript, HTML/CSS, R, SQL, Bash
 
 ### Frameworks and Libraries
-React, Node.js, Vite, pandas, NumPy, Matplotlib, FFmpeg, Whisper, PyTorch, TensorFlow, Folium, GeoPy
+React, Next.js, Node.js, Vite, pandas, NumPy, Matplotlib, FFmpeg, Whisper, PyTorch, TensorFlow, Folium, GeoPy
 
 ### Tools and Platforms
-Git, Github Actions, Docker, Shell, AWS, Linux, Docker, Kubernetes, Firebase, Selenium
-
-## Computational Biology
+Git, Github Actions, Docker, Shell, AWS, Linux, Docker, Kubernetes, Firebase, Selenium, MongoDB, 
 
 ### Bioinformatics Tools
 - **Single-cell Analysis:** Seurat, Scanpy, CellRanger, inferCNV, copyKAT, tSpace, scVelo, Monocle
@@ -24,17 +20,5 @@ Git, Github Actions, Docker, Shell, AWS, Linux, Docker, Kubernetes, Firebase, Se
 - **Structural Biology:** Rosetta, ChimeraX, PyMOL, GROMACS, AlphaFold, ColabFold, Boltz
 - **Cell Communication:** CellPhoneDB, CellChat
 
-## Laboratory Skills
-
 ### Wet Lab Techniques
-- Cell culture
-- PCR
-- Western blotting
-- Plasmid isolation
-- CRISPR screening
-- Synthetic organic chemistry
-- NMR
-- TLC
-- Mass spectrometry
-- UV/Vis spectroscopy
-- IR spectroscopy 
+- Cell culture, PCR, Western blotting, Plasmid isolation, CRISPR screening, Synthetic organic chemistry, NMR, TLC, Mass spectrometry, UV/Vis spectroscopy, IR spectroscopy 
