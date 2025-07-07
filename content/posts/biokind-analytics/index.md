@@ -9,9 +9,9 @@ tags:
 
 > As Director of Biokind Analytics at Rice University, I lead client partnerships, chapter development, and data science initiatives, managing projects that analyze over $500M in combined nonprofit funds while mentoring student teams and expanding our organization's impact.
 
-## Leadership Role & Impact
+## About
 
-As one of the Directors at Biokind Analytics, I collaborate with the leadership team to drive our organization's mission of empowering healthcare nonprofits through data science. My role encompasses both strategic leadership and hands-on project management:
+As a director, I work with the leadership team to drive our organization's mission of empowering healthcare nonprofits through data science. My role encompasses both strategic leadership and hands-on project management:
 
 ### Client Partnership Development
 - Spearhead community outreach to identify and secure nonprofit partnerships
