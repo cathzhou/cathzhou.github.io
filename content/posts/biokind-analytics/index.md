@@ -27,6 +27,8 @@ As a director, I work with the leadership team to drive our organization's missi
 - Coordinate fundraising efforts to support organization growth
 - Mentor team leads and ensure project quality and timely delivery
 
+<figure class="image-container"><img src="biokind_team.jpg" alt="Spring 2025 Biokind Analytics Final Presentation"><figcaption class="image-caption">Spring 2025 Biokind Analytics final showcase and team picture</figcaption></figure>
+
 ## Project Management Cycle
 
 ### Pre-Semester Planning (June-August)
@@ -70,7 +72,9 @@ Since it was founded, Biokind Analytics has achieved significant growth:
 
 ### Team Lead: Children at Risk (Houston, TX)
 
-As Team Lead for the Children at Risk (C@R) project, I directed the data analysis and visualization efforts for their biennial "Growing Up in Houston" publication, a comprehensive report on children's quality of life in Harris County. This high-impact project serves as a crucial resource for grant writers, nonprofit leaders, and parents throughout the Houston area.
+As Team Lead for the Children at Risk (C@R) project, I directed the data analysis and visualization efforts for their biennial "Growing Up in Houston" publication ([2023 version here](https://childrenatrisk.org/guih2023/)), a comprehensive report on children's quality of life in Harris County. This high-impact project serves as a crucial resource for grant writers, nonprofit leaders, and parents throughout the Houston area.
+
+<figure class="image-container"><img src="biokind_presentation.jpg" alt="Children At Risk Presentation"><figcaption class="image-caption">Children At Risk final presentation</figcaption></figure>
 
 #### Project Scope & Impact
 - Led visualization development for key metrics across multiple domains:
@@ -80,16 +84,15 @@ As Team Lead for the Children at Risk (C@R) project, I directed the data analysi
   - Overall child wellness metrics
 - Designed accessible, cohesive visualizations for diverse stakeholders
 - Created narrative-driven analysis for public consumption
-- Supported grant-writing efforts of multiple organizations
 
 #### Technical Approach
 - Synthesized multiple complex datasets into clear, actionable insights
 - Maintained consistent color coding and design patterns
-- Developed concise trend analysis narratives
-- Created event-based analysis (e.g., superintendent changes)
+- Developed concise trend analysis narratives and written descriptions
+- Included context-based analysis (e.g., superintendent changes)
 - Prioritized simplicity and digestibility for non-technical audiences
 
-
+Here is our final presentation slideshow:
 <div class="slideshow-container" style="position: relative; width: 100%; padding-top: 60%; margin: 2em 0;">
     <iframe 
         src="https://docs.google.com/presentation/d/e/2PACX-1vR6aolssJ4d-oi9e_-EMistL5HrR741CN22wtoULBK3Z17SdA_HudUjDE3Jf3duF0tz1OVNnX4_q8gT/pubembed?start=true&loop=true&delayms=5000"
@@ -101,4 +104,4 @@ As Team Lead for the Children at Risk (C@R) project, I directed the data analysi
     </iframe>
 </div>
 
-This project exemplifies Biokind Analytics' mission of leveraging data science to create meaningful impact in our community. The visualizations and analysis we provided continue to inform policy decisions and support grant applications for numerous organizations serving Houston's children.
+I'm passionate about leveraging data science to create meaningful impact in the community, and I'm grateful for the ability to do so through projects like this at Biokind. The visualizations and analysis we provided continue to inform policy decisions and support grant applications for numerous organizations serving Houston's children.

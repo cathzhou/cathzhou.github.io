@@ -1,7 +1,10 @@
 ---
 title: "Deorphanizing GPCRs: Novel Receptor-Ligand Pairs in Cancer Research"
-date: 2024-03-19
+date: 2025-06-01
 description: "Research work at Stanford University School of Medicine's Butcher Lab, focusing on computational approaches to identify novel GPCR receptor-ligand pairs."
+cover: stanford_banner.png
+tags:
+  - research
 ---
 
 At the Butcher Lab in Stanford University School of Medicine, I've been working on an exciting project that combines computational biology with experimental validation to identify new GPCR receptor-ligand pairs. This work has contributed to a recent publication in *Nature*.

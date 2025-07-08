@@ -1,10 +1,13 @@
 ---
-title: "Fostering Civic Engagement: Center for Civic Leadership Ambassador"
+title: "Center for Civic Leadership Ambassador: Fostering Civic Engagement"
 date: 2024-03-19
-description: "Serving as a school-wide ambassador for Rice University's Center for Civic Leadership, connecting students with community-focused programs."
+description: "Serving as a school-wide ambassador for Rice University's Center for Civic Leadership, connecting students with community-focused civic opportunities."
+cover: ccl_banner.png
+tags:
+  - leadership
 ---
 
-As an Ambassador for the Center for Civic Leadership (CCL) at Rice University, I work to bridge the gap between students and community engagement opportunities, fostering meaningful connections and civic participation.
+> As an Ambassador for the Center for Civic Leadership (CCL) at Rice University, I work to bridge the gap between students and community engagement opportunities, fostering meaningful connections and civic participation.
 
 ## Role and Impact
 

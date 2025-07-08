@@ -101,48 +101,31 @@ pre code {
   font-family: 'Courier New', Courier, monospace !important;
 }
 
-/* Resume page styles */
-.resume-wrapper {
-  max-width: 1000px;
-  margin: 2rem auto;
-  padding: 0 1rem;
+/* Image caption styles */
+.image-container {
+  margin: 0;
+  padding: 0;
+  line-height: 0;
 }
 
-.resume-actions {
-  margin-bottom: 2rem;
+.image-container img {
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+  display: block;
+  margin: 0;
+  padding: 0;
+  vertical-align: bottom;
+}
+
+.image-caption {
+  margin: 0;
+  padding: 4px 0 0 0;
+  font-size: 0.7rem;
+  color: var(--base-content);
+  opacity: 0.7;
+  font-style: italic;
   text-align: center;
-}
-
-.resume-actions .btn {
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
-  background-color: var(--primary);
-  color: white;
-  text-decoration: none;
-  border-radius: 0.5rem;
-  transition: all 0.3s ease;
-}
-
-.resume-actions .btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.resume-viewer {
-  background: white;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* Dark mode adjustments */
-[data-theme="forest"] .resume-viewer {
-  background: #1a1a1a;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .resume-viewer object {
-    height: 500px;
-  }
+  line-height: 1;
+  display: block;
 }
