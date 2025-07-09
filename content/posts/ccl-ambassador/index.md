@@ -2,6 +2,7 @@
 title: "Center for Civic Leadership: Bridging STEM and Social Impact"
 date: 2024-02-01
 description: "Serving as a CCL Ambassador at Rice University, connecting students with community engagement opportunities and leading initiatives in social justice and public health."
+cover: ccl_banner.png
 tags:
   - leadership
   - service
