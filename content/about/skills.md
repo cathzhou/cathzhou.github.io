@@ -9,7 +9,7 @@ Java, Python, C/C++, JavaScript, TypeScript, HTML/CSS, R, SQL, Bash
 React, Next.js, Node.js, Vite, pandas, NumPy, Matplotlib, FFmpeg, Whisper, PyTorch, TensorFlow, Folium, GeoPy
 
 ### Tools and Platforms
-Git, Github Actions, Docker, Shell, AWS, Linux, Docker, Kubernetes, Firebase, Selenium, MongoDB, 
+Git, Github Actions, Docker, Shell, AWS, Linux, Docker, Kubernetes, Firebase, Selenium, MongoDB, Neon
 
 ### Bioinformatics Tools
 - **Single-cell Analysis:** Seurat, Scanpy, CellRanger, inferCNV, copyKAT, tSpace, scVelo, Monocle

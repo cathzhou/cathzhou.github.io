@@ -1,7 +1,7 @@
 ---
 title: "Biokind Analytics: Bridging Data Science and Healthcare Nonprofits"
 date: 2025-05-01
-description: "Leading Biokind Analytics at Rice University as Director, overseeing client partnerships, chapter development, and data science initiatives for healthcare nonprofits."
+description: "How I lead Biokind Analytics at Rice University as Director, overseeing client partnerships, chapter development, and data science initiatives for healthcare nonprofits."
 cover: biokind_banner.png
 tags:
   - leadership
@@ -72,7 +72,7 @@ Since it was founded, Biokind Analytics has achieved significant growth:
 
 ### Team Lead: Children at Risk (Houston, TX)
 
-As Team Lead for the Children at Risk (C@R) project, I directed the data analysis and visualization efforts for their biennial "Growing Up in Houston" publication ([2023 version here](https://childrenatrisk.org/guih2023/)), a comprehensive report on children's quality of life in Harris County. This high-impact project serves as a crucial resource for grant writers, nonprofit leaders, and parents throughout the Houston area.
+As Team Lead for the Children at Risk (C@R) project, I directed the data analysis and visualization efforts for their biennial "Growing Up in Houston" [publication](https://childrenatrisk.org/guih2023/), a comprehensive report on children's quality of life in Harris County. This high-impact project serves as a crucial resource for grant writers, nonprofit leaders, and parents throughout the Houston area.
 
 <figure class="image-container"><img src="biokind_presentation.jpg" alt="Children At Risk Presentation"><figcaption class="image-caption">Children At Risk final presentation</figcaption></figure>
 
