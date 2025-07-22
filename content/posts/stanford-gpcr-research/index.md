@@ -24,9 +24,9 @@ GPCRs are critical drug targets, yet many remain orphan receptors with unknown l
 ### Technical Achievements
 
 - Developed a multi-omics pipeline integrating bioinformatics, structural modeling, and machine learning
-- Created a high-throughput computational pipeline screening over 25,000 protein complexes
+- Created a high-throughput computational pipeline screening millions of protein complexes
 - Achieved 80% reduction in AlphaFold2 run time through HPC optimization
-- Successfully identified and validated novel GPCR-ligand pairs, including CXCL17 and GPR25
+- Successfully identified and validated novel GPCR-ligand pairs, including CXCL17 and GPR25 (published in Nature)
 
 ### Implementation Details
 
@@ -78,9 +78,11 @@ My work has contributed significantly to:
 2. Advancing methodologies for single-cell RNA splicing analysis
 3. Identifying novel therapeutic targets in cancer treatment
 
-Our findings have been published in [*Nature* (2024)](https://www.nature.com/articles/s41586-024-08043-2), leading to:
+Our findings have been published in [Nature (2024)](https://www.nature.com/articles/s41586-024-08043-2), leading to:
 - Patent pending for novel GPCR-ligand discoveries
 - Millions in grant funding
 - Setting new standards for computational approaches in cancer research
+
+I have also presented my research on de-orphanizing GPCRs at [ISMB 2025](https://www.iscb.org/ismbeccb2025/programme-agenda/scientific-programme/function) by 
 
 This experience has strengthened my conviction in the power of bioinformatics to benefit patients at scale, bridging the gap between clinical data and computational expertise to advance cancer treatment. 
