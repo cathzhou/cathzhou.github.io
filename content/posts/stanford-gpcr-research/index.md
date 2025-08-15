@@ -83,6 +83,6 @@ Our findings have been published in [Nature (2024)](https://www.nature.com/artic
 - Millions in grant funding
 - Setting new standards for computational approaches in cancer research
 
-I have also presented my research on de-orphanizing GPCRs at [ISMB 2025](https://www.iscb.org/ismbeccb2025/programme-agenda/scientific-programme/function) by 
+I have also presented my research on de-orphanizing GPCRs at [ISMB 2025](https://www.iscb.org/ismbeccb2025/programme-agenda/scientific-programme/function).
 
 This experience has strengthened my conviction in the power of bioinformatics to benefit patients at scale, bridging the gap between clinical data and computational expertise to advance cancer treatment. 
