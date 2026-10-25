@@ -3,17 +3,16 @@ import { Delaunay } from 'https://cdn.jsdelivr.net/npm/d3-delaunay@6/+esm';
 const JEWELS = ['#e0245e', '#2b3fe0', '#1fa84f', '#ff8a1f', '#8a3cf0', '#13b9c9', '#ffd23f', '#ff5fa2', '#159bdc'];
 const LEAD = '#141018';
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const hasMouse = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
-/* Palettes taken from bright figurative windows: sunlit rays, cool blues, chrysanthemums, leaves. */
-const SUN = ['#ffe14d', '#fff1a1', '#fffaf0', '#ffd23f', '#a8ecff', '#ffc6e6', '#fff7c2', '#ffb347'];
-const COOL = ['#2733d6', '#4a2fc9', '#159bdc', '#7a35ee', '#c93bd0', '#13b9c9', '#3567ff', '#1d1f8f', '#e0307a'];
-const LEAF = ['#0f7a35', '#24a148', '#5cc93b', '#9ee04a', '#0b5a2e', '#2fb36b', '#c8ea5a'];
-const RIM = ['#d4143c', '#ff4f7b', '#ff7a3d', '#c2185b', '#ff9a3c', '#8e1fbf', '#ff3d6e'];
-const PETALS = [
-    [['#7a0f2a', '#b3122e', '#e0472a'], ['#d81f3a', '#f0542a', '#ff8a1f', '#e8283c'], ['#ff9f1c', '#ffc928', '#ffe25c', '#fff0b0', '#ff7b2e']],
-    [['#6d0f3a', '#a3165a', '#c21f4a'], ['#e0307a', '#ff5fa2', '#f0542a'], ['#ffa3c8', '#ffd1e3', '#ffe25c', '#fff0f6']],
-];
-const PALETTE = [...SUN, ...COOL, ...LEAF.slice(0, 4), ...RIM.slice(0, 4)].map((c) => [c, 1]);
+/* Palettes taken from a sunlit tree window: blue sky, violet bark, bright leaves, a jewel-toned floor. */
+const SKY = ['#5aa9f5', '#8fd0ff', '#3f7cf0', '#a8dcff', '#4fc6e0', '#2fb0d6', '#7fb2ff', '#c4e6ff', '#6a8ff5'];
+const BARK = ['#1e1240', '#2a1650', '#3a1f6a', '#4a2470', '#24185a', '#33205a', '#2b2a7a'];
+const BARK_LIT = ['#b0662a', '#d98a2b', '#8a4a2a', '#f0b040'];
+const LEAF = ['#5cc93b', '#9ee04a', '#c8ea5a', '#2fb36b', '#24a148', '#e8e05a', '#7fd6a0', '#3fbfa0', '#0f8a55'];
+const GLOW = ['#ffe14d', '#fff1a1', '#ffd23f', '#f6f08a'];
+const GROUND = ['#5b2a86', '#8a3cf0', '#c2185b', '#e0307a', '#3b2a8a', '#7a35ee', '#d4143c', '#2b3fe0'];
+const PALETTE = [...SKY, ...LEAF, ...GROUND.slice(0, 4), ...GLOW.slice(0, 2)].map((c) => [c, 1]);
 
 const rand = (a, b) => a + Math.random() * (b - a);
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -79,14 +78,14 @@ function makeRipples(size = 256) {
     return c;
 }
 
-/* The window behind the whole page: sun rays, chrysanthemums and leaves, ringed by a leaded frame. */
+/* The window behind the whole page: trees in leaded glass, branches spreading against the sky. */
 class GlassWindow {
     constructor(canvas) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
         this.noise = makeNoise();
         this.ripples = makeRipples();
-        this.light = { x: 0.3, y: 0.3, active: false };
+        this.light = { x: 0.22, y: 0.2, active: hasMouse };
         this.hover = -1;
         this.sparkles = [];
         this.t = Math.random() * 100;
@@ -102,18 +101,34 @@ class GlassWindow {
         this.build();
     }
 
-    layoutFlowers(w, h, small) {
-        const spots = small
-            ? [[0.02, 0.12, 0.42], [0.98, 0.5, 0.36], [0.1, 0.9, 0.4]]
-            : [[0.1, 0.32, 0.27], [0.2, 0.9, 0.19], [0.9, 0.82, 0.24], [0.88, 0.1, 0.14]];
-        const minDim = Math.min(w, h);
-        return spots.map(([fx, fy, fr], i) => ({
-            x: (fx + rand(-0.03, 0.03)) * w,
-            y: (fy + rand(-0.03, 0.03)) * h,
-            r: fr * minDim * rand(0.9, 1.1),
-            petals: PETALS[i === 2 ? 1 : 0],
-            spin: rand(0, Math.PI * 2),
-        }));
+    /* Grow branching trees; each branch is a tapered segment, each twig tip carries a cluster of leaves. */
+    growTrees(w, h, small, dpr) {
+        const ground = h * (small ? 0.9 : 0.86);
+        const roots = small ? [[0.5, 1]] : [[0.17, 1], [0.84, 0.92]];
+        const branches = [], leaves = [];
+        const grow = (x, y, ang, len, thick, depth) => {
+            const x2 = x + Math.cos(ang) * len, y2 = y + Math.sin(ang) * len;
+            branches.push({ x1: x, y1: y, x2, y2, t1: thick, t2: thick * 0.72 });
+            if (depth === 0 || thick < 7 * dpr) {
+                leaves.push({ x: x2, y: y2, r: len * rand(1.3, 1.9) + 50 * dpr });
+                return;
+            }
+            const kids = depth > 3 ? 2 : pick([2, 2, 3]);
+            for (let k = 0; k < kids; k++) {
+                const spread = kids === 2 ? (k ? 1 : -1) * rand(0.32, 0.62) : (k - 1) * rand(0.45, 0.7);
+                /* Branches bend toward the horizontal so the crown spreads wide. */
+                const a = ang + spread + (ang < -Math.PI / 2 ? -0.08 : 0.08);
+                grow(x2, y2, a, len * rand(0.68, 0.8), thick * 0.68, depth - 1);
+            }
+            if (depth <= 2) leaves.push({ x: x2, y: y2, r: len * 1.1 });
+        };
+        const scale = Math.min(w, h * 1.4);
+        for (const [fx, size] of roots) {
+            const x = (fx + rand(-0.02, 0.02)) * w;
+            const lean = (0.5 - fx) * 0.25 + rand(-0.05, 0.05);
+            grow(x, ground + 20 * dpr, -Math.PI / 2 + lean, h * 0.32 * size, scale * 0.09 * size, small ? 5 : 6);
+        }
+        return { ground, branches, leaves };
     }
 
     build() {
@@ -124,51 +139,54 @@ class GlassWindow {
         this.w = w; this.h = h; this.dpr = dpr;
 
         const small = window.innerWidth < 600;
-        const cx = w / 2, cy = h * 0.42;
-        const pane = document.querySelector('.container')?.getBoundingClientRect();
-        this.clearHalf = ((pane ? pane.width / 2 : 340) + (small ? 0 : 24)) * dpr;
-        this.clearFade = (small ? 40 : 150) * dpr;
-        this.center = [cx, cy];
-        this.rim = (Math.hypot(w, h) / 2) * (small ? 0.96 : 0.9);
-        const flowers = this.flowers = this.layoutFlowers(w, h, small);
+        const { ground, branches, leaves } = this.trees = this.growTrees(w, h, small, dpr);
+        const glowAt = [w * rand(0.35, 0.65), h * rand(0.25, 0.45)];
+
+        /* How far a point sits outside the nearest branch (negative inside the wood). */
+        const barkGap = (x, y) => {
+            let best = Infinity;
+            for (const b of branches) {
+                const dx = b.x2 - b.x1, dy = b.y2 - b.y1;
+                const t = Math.max(0, Math.min(1, ((x - b.x1) * dx + (y - b.y1) * dy) / (dx * dx + dy * dy)));
+                const half = (b.t1 + (b.t2 - b.t1) * t) / 2;
+                best = Math.min(best, Math.hypot(x - (b.x1 + dx * t), y - (b.y1 + dy * t)) - half);
+            }
+            return best;
+        };
+        const leafAt = (x, y) => leaves.some((l) => Math.hypot(x - l.x, y - l.y) < l.r * rand(0.75, 1));
+        const outside = (x, y) => (y > ground ? 'ground' : leafAt(x, y) ? 'leaf' : 'sky');
 
         const points = [], meta = [];
-        const add = (x, y, m) => { points.push([x, y]); meta.push(m); };
-        const inFlower = (x, y, pad) => flowers.some((f) => Math.hypot(x - f.x, y - f.y) < f.r * pad);
+        const add = (x, y, kind) => { points.push([x, y]); meta.push(kind); };
 
-        /* Two bands of noise decide where rays run warm (sunlight) or cool (sky). */
-        const p1 = rand(0, 6), p2 = rand(0, 6);
-        const rays = small ? 70 : 120;
-        for (let i = 0; i < rays; i++) {
-            const a = ((i + rand(-0.2, 0.2)) / rays) * Math.PI * 2;
-            const warm = Math.sin(a * 3 + p1) + 0.6 * Math.sin(a * 5 + p2) > -0.1;
-            for (let r = rand(20, 60) * dpr; r < this.rim * 1.02; r += (rand(70, 130) + r / dpr * 0.22) * dpr) {
-                const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
-                if (inFlower(x, y, 1.5)) continue;
-                const family = Math.random() < 0.12 ? (warm ? COOL : SUN) : (warm ? SUN : COOL);
-                add(x, y, { kind: 'ray', color: family, a });
-            }
-        }
-
-        for (const f of flowers) {
-            const rings = 5;
-            add(f.x, f.y, { kind: 'petal', f, t: 0 });
-            for (let k = 1; k < rings; k++) {
-                const t = k / (rings - 1);
-                const rr = f.r * (0.12 + 0.88 * Math.pow(t, 0.85));
-                const n = Math.max(7, Math.round((Math.PI * 2 * rr) / (f.r * 0.13)));
-                for (let j = 0; j < n; j++) {
-                    const a = f.spin + ((j + (k % 2) * 0.5 + rand(-0.12, 0.12)) / n) * Math.PI * 2;
-                    add(f.x + Math.cos(a) * rr, f.y + Math.sin(a) * rr, { kind: 'petal', f, t });
+        /* Seeds in pairs just inside and just outside each branch, so a lead line runs along the edge of the wood. */
+        const s = (small ? 14 : 18) * dpr;
+        for (const b of branches) {
+            const len = Math.hypot(b.x2 - b.x1, b.y2 - b.y1);
+            const nx = -(b.y2 - b.y1) / len, ny = (b.x2 - b.x1) / len;
+            for (let d = 0; d < len; d += s * rand(0.9, 1.3)) {
+                const t = d / len;
+                const half = (b.t1 + (b.t2 - b.t1) * t) / 2;
+                const cx = b.x1 + (b.x2 - b.x1) * t, cy = b.y1 + (b.y2 - b.y1) * t;
+                for (const side of [-1, 1]) {
+                    const ix = cx + nx * side * Math.max(0, half - s * 0.45), iy = cy + ny * side * Math.max(0, half - s * 0.45);
+                    if (half > s * 0.5 || side > 0) add(ix, iy, 'bark');
+                    const ox = cx + nx * side * (half + s * 0.45), oy = cy + ny * side * (half + s * 0.45);
+                    if (barkGap(ox, oy) > s * 0.3) add(ox, oy, outside(ox, oy));
+                }
+                /* Wide trunks get a few pieces across their middle too. */
+                for (let k = 1; half * 2 > s * 2.6 && k < Math.floor((half * 2) / (s * 1.6)); k++) {
+                    const off = -half + (k * half * 2) / Math.floor((half * 2) / (s * 1.6)) + rand(-0.2, 0.2) * s;
+                    add(cx + nx * off, cy + ny * off, 'bark');
                 }
             }
-            const leafCell = (small ? 30 : 40) * dpr;
-            const count = Math.round((Math.PI * (2.25 - 1.15) * f.r * f.r) / (leafCell * leafCell));
-            for (let j = 0; j < count; j++) {
-                const a = rand(0, Math.PI * 2), rr = f.r * Math.sqrt(rand(1.15, 2.25));
-                const x = f.x + Math.cos(a) * rr, y = f.y + Math.sin(a) * rr;
-                if (flowers.some((g) => g !== f && Math.hypot(x - g.x, y - g.y) < g.r * 1.1)) continue;
-                add(x, y, { kind: 'leaf', f });
+        }
+        const cell = (small ? 26 : 34) * dpr;
+        for (let y = cell / 2; y < h + cell; y += cell * 0.86) {
+            for (let x = cell / 2; x < w + cell; x += cell) {
+                const px = x + rand(-0.4, 0.4) * cell, py = y + rand(-0.4, 0.4) * cell;
+                if (barkGap(px, py) < s * 1.1) continue;
+                add(px, py, outside(px, py));
             }
         }
 
@@ -176,13 +194,15 @@ class GlassWindow {
         this.meta = meta;
         this.delaunay = Delaunay.from(points);
         this.voronoi = this.delaunay.voronoi([0, 0, w, h]);
-        this.base = meta.map((m) => {
-            if (m.kind === 'ray') return jewelHsl(pick(m.color), 0.06);
-            if (m.kind === 'leaf') return jewelHsl(pick(LEAF), 0.06);
-            const band = m.t < 0.3 ? 0 : m.t < 0.8 ? 1 : 2;
-            return jewelHsl(pick(m.f.petals[band]), 0.05);
+        const reach = Math.max(w, h) * 0.35;
+        this.base = meta.map((kind, i) => {
+            const [x, y] = points[i];
+            const lit = 1 - Math.min(1, Math.hypot(x - glowAt[0], y - glowAt[1]) / reach);
+            if (kind === 'bark') return jewelHsl(pick(Math.random() < lit * 0.9 ? BARK_LIT : BARK), 0.05);
+            if (kind === 'ground') return jewelHsl(pick(GROUND), 0.06);
+            if (Math.random() < lit * lit * 0.8) return jewelHsl(pick(GLOW), 0.04);
+            return jewelHsl(pick(kind === 'leaf' ? LEAF : SKY), 0.07);
         });
-        this.rimColors = Array.from({ length: 16 }, () => jewelHsl(pick(RIM), 0.06));
         this.colors = this.base.slice();
         this.flash = new Float32Array(points.length);
         this.sparkles = [];
@@ -192,37 +212,22 @@ class GlassWindow {
 
     renderLayers() {
         const { w, h, dpr } = this;
-        const [cx, cy] = this.center;
-        const far = Math.hypot(w, h);
         this.glass = this.glass || document.createElement('canvas');
         this.leadLayer = this.leadLayer || document.createElement('canvas');
         for (const c of [this.glass, this.leadLayer]) { c.width = w; c.height = h; }
 
         const g = this.glass.getContext('2d');
-        g.save();
-        g.beginPath();
-        g.arc(cx, cy, this.rim, 0, Math.PI * 2);
-        g.clip();
         for (let i = 0; i < this.colors.length; i++) {
-            const m = this.meta[i];
             g.beginPath();
             this.voronoi.renderCell(i, g);
             g.fillStyle = this.colors[i];
             g.fill();
-            let grad;
-            if (m.kind === 'petal') {
-                grad = g.createRadialGradient(m.f.x, m.f.y, 0, m.f.x, m.f.y, m.f.r * 1.05);
-                grad.addColorStop(0, 'rgba(0,0,0,0.3)');
-                grad.addColorStop(0.6, 'rgba(255,255,255,0)');
-                grad.addColorStop(1, 'rgba(255,255,255,0.3)');
-            } else {
-                const [x0, y0, x1, y1] = this.cellBounds(i);
-                const flip = Math.random() < 0.5;
-                grad = g.createLinearGradient(flip ? x1 : x0, y0, flip ? x0 : x1, y1);
-                grad.addColorStop(0, 'rgba(255,255,255,0.28)');
-                grad.addColorStop(0.5, 'rgba(255,255,255,0)');
-                grad.addColorStop(1, 'rgba(0,0,0,0.16)');
-            }
+            const [x0, y0, x1, y1] = this.cellBounds(i);
+            const flip = Math.random() < 0.5;
+            const grad = g.createLinearGradient(flip ? x1 : x0, y0, flip ? x0 : x1, y1);
+            grad.addColorStop(0, 'rgba(255,255,255,0.28)');
+            grad.addColorStop(0.5, 'rgba(255,255,255,0)');
+            grad.addColorStop(1, this.meta[i] === 'bark' ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.16)');
             g.fillStyle = grad;
             g.fill();
             if (this.flash[i] > 0) {
@@ -230,26 +235,6 @@ class GlassWindow {
                 g.fill();
             }
         }
-        g.restore();
-
-        const spokes = this.rimColors.length;
-        for (let j = 0; j < spokes; j++) {
-            const a0 = (j / spokes) * Math.PI * 2, a1 = ((j + 1) / spokes) * Math.PI * 2;
-            g.beginPath();
-            g.arc(cx, cy, this.rim, a0, a1);
-            g.arc(cx, cy, far, a1, a0, true);
-            g.closePath();
-            g.fillStyle = this.rimColors[j];
-            g.fill();
-            const grad = g.createRadialGradient(cx, cy, this.rim, cx, cy, far * 0.62);
-            grad.addColorStop(0, 'rgba(255,255,255,0.3)');
-            grad.addColorStop(1, 'rgba(0,0,0,0.25)');
-            g.fillStyle = grad;
-            g.fill();
-        }
-
-        g.fillStyle = this.clearGradient(g, 'rgba(253,250,244,', 0.91);
-        g.fillRect(0, 0, w, h);
 
         g.globalCompositeOperation = 'overlay';
         g.globalAlpha = 0.28;
@@ -264,48 +249,12 @@ class GlassWindow {
         g.globalAlpha = 1;
 
         const l = this.leadLayer.getContext('2d');
-        l.save();
-        l.beginPath();
-        l.arc(cx, cy, this.rim, 0, Math.PI * 2);
-        l.clip();
         l.beginPath();
         this.voronoi.render(l);
         l.strokeStyle = LEAD;
         l.lineWidth = 2.2 * dpr;
         l.lineJoin = 'round';
         l.stroke();
-        l.restore();
-        l.strokeStyle = LEAD;
-        l.lineCap = 'butt';
-        l.lineWidth = 14 * dpr;
-        l.beginPath();
-        l.arc(cx, cy, this.rim, 0, Math.PI * 2);
-        l.stroke();
-        l.beginPath();
-        for (let j = 0; j < spokes; j++) {
-            const a = (j / spokes) * Math.PI * 2;
-            l.moveTo(cx + Math.cos(a) * this.rim, cy + Math.sin(a) * this.rim);
-            l.lineTo(cx + Math.cos(a) * far, cy + Math.sin(a) * far);
-        }
-        l.stroke();
-        l.globalCompositeOperation = 'destination-out';
-        l.fillStyle = this.clearGradient(l, 'rgba(0,0,0,', 0.88);
-        l.fillRect(0, 0, w, h);
-        l.globalCompositeOperation = 'source-over';
-    }
-
-    /* The panes behind the text are clear glass, fading into color toward the sides. */
-    clearGradient(c, rgb, alpha) {
-        const mid = this.w / 2, half = this.clearHalf, fade = this.clearFade;
-        const x0 = Math.max(0, mid - half - fade), x1 = Math.min(this.w, mid + half + fade);
-        const grad = c.createLinearGradient(x0, 0, x1, 0);
-        const span = x1 - x0 || 1;
-        const inner = Math.min(0.49, (mid - half - x0) / span);
-        grad.addColorStop(0, `${rgb}0)`);
-        grad.addColorStop(inner, `${rgb}${alpha})`);
-        grad.addColorStop(1 - inner, `${rgb}${alpha})`);
-        grad.addColorStop(1, `${rgb}0)`);
-        return grad;
     }
 
     cellBounds(i) {
@@ -319,7 +268,7 @@ class GlassWindow {
     }
 
     insideRim(x, y) {
-        return Math.hypot(x - this.center[0], y - this.center[1]) < this.rim - 7 * this.dpr;
+        return x >= 0 && y >= 0 && x <= this.w && y <= this.h;
     }
 
     addSparkle(x, y, opts = {}) {
@@ -331,27 +280,23 @@ class GlassWindow {
             max: opts.max || rand(40, 90),
             size: (opts.size || rand(5, 14)) * this.dpr,
             rot: rand(0, Math.PI / 4),
-            hue: pick([48, 55, 190, 320, 0, 280]),
+            hue: pick([42, 48, 52, 56]),
         });
     }
 
-    /* Glints catch where the lead lines meet, and more often near the light. */
-    spawnAmbient() {
-        const cc = this.voronoi.circumcenters;
-        const tries = this.light.active ? 2 : 1;
+    /* The cursor is the sun: glints catch on lead joints near it, more often the closer they are. */
+    spawnGlints(tries = 2) {
+        const reach = Math.max(this.w, this.h) * 0.2;
+        const sx = this.light.x * this.w, sy = this.light.y * this.h;
         for (let k = 0; k < tries; k++) {
-            if (Math.random() > 0.55) continue;
-            let x, y;
-            if (Math.random() < 0.5) {
-                const ang = rand(0, Math.PI * 2), d = rand(0, Math.max(this.w, this.h) * 0.22);
-                x = this.light.x * this.w + Math.cos(ang) * d;
-                y = this.light.y * this.h + Math.sin(ang) * d;
-            } else {
-                const i = Math.floor(Math.random() * (cc.length / 2));
-                x = cc[i * 2]; y = cc[i * 2 + 1];
-            }
-            const behindText = Math.abs(x - this.w / 2) < this.clearHalf;
-            if (!behindText && x >= 0 && y >= 0 && x <= this.w && y <= this.h) this.addSparkle(x, y);
+            if (Math.random() > 0.5) continue;
+            const ang = rand(0, Math.PI * 2), d = reach * Math.abs(rand(-1, 1) * rand(0, 1));
+            const cell = this.delaunay.find(sx + Math.cos(ang) * d, sy + Math.sin(ang) * d);
+            const poly = this.voronoi.cellPolygon(cell);
+            if (!poly) continue;
+            const [x, y] = pick(poly);
+            const near = 1 - Math.min(1, Math.hypot(x - sx, y - sy) / reach);
+            if (near > 0 && this.insideRim(x, y)) this.addSparkle(x, y, { size: 4 + 10 * near, max: rand(30, 70) });
         }
     }
 
@@ -395,36 +340,19 @@ class GlassWindow {
         const { ctx, w, h } = this;
         ctx.globalCompositeOperation = 'source-over';
         ctx.drawImage(this.glass, 0, 0);
-        ctx.fillStyle = 'rgba(10, 8, 20, 0.06)';
+        ctx.fillStyle = 'rgba(10, 8, 20, 0.16)';
         ctx.fillRect(0, 0, w, h);
 
         const lx = this.light.x * w, ly = this.light.y * h;
         ctx.globalCompositeOperation = 'screen';
-        const radius = Math.max(w, h) * (this.light.active ? 0.26 : 0.36);
+        const radius = Math.max(w, h) * 0.3;
         const glow = ctx.createRadialGradient(lx, ly, 0, lx, ly, radius);
-        glow.addColorStop(0, 'rgba(255,246,220,0.55)');
-        glow.addColorStop(0.35, 'rgba(255,238,200,0.18)');
-        glow.addColorStop(1, 'rgba(255,238,200,0)');
+        glow.addColorStop(0, 'rgba(255,248,225,0.75)');
+        glow.addColorStop(0.12, 'rgba(255,240,200,0.45)');
+        glow.addColorStop(0.45, 'rgba(255,232,190,0.12)');
+        glow.addColorStop(1, 'rgba(255,232,190,0)');
         ctx.fillStyle = glow;
         ctx.fillRect(0, 0, w, h);
-
-        /* A sheen of light sweeps across the glass every few seconds. */
-        if (!reduceMotion) {
-            const s = (this.t * 0.7) % 1;
-            const band = Math.max(w, h) * 0.12;
-            const x = -0.3 * w + s * 1.6 * w;
-            ctx.save();
-            ctx.translate(w / 2, h / 2);
-            ctx.rotate(0.38);
-            ctx.translate(-w / 2, -h / 2);
-            const sheen = ctx.createLinearGradient(x - band, 0, x + band, 0);
-            sheen.addColorStop(0, 'rgba(255,255,255,0)');
-            sheen.addColorStop(0.5, 'rgba(255,255,255,0.22)');
-            sheen.addColorStop(1, 'rgba(255,255,255,0)');
-            ctx.fillStyle = sheen;
-            ctx.fillRect(-w, -h, w * 3, h * 3);
-            ctx.restore();
-        }
 
         if (this.hover >= 0) {
             ctx.beginPath();
@@ -439,17 +367,21 @@ class GlassWindow {
 
     loop() {
         this.running = true;
-        if (reduceMotion) {
-            for (let i = 0; i < 30; i++) this.spawnAmbient();
-            this.sparkles.forEach((s) => { s.life = s.max / 2; s.max = Infinity; });
-        }
         const tick = () => {
             this.t += 0.003;
+            /* Without a mouse, the sun drifts slowly across the window on its own. */
             if (!this.light.active && !reduceMotion) {
                 this.light.x = 0.5 + Math.sin(this.t * 1.3) * 0.45;
                 this.light.y = 0.45 + Math.sin(this.t * 0.9 + 1) * 0.35;
             }
-            if (!reduceMotion) this.spawnAmbient();
+            if (reduceMotion) {
+                if (!this.sparkles.length) {
+                    for (let i = 0; i < 40; i++) this.spawnGlints();
+                    this.sparkles.forEach((s) => { s.life = s.max / 2; s.max = Infinity; });
+                }
+            } else {
+                this.spawnGlints();
+            }
             let dirty = false;
             for (let i = 0; i < this.flash.length; i++) {
                 if (this.flash[i] > 0) { this.flash[i] = Math.max(0, this.flash[i] - 0.04); dirty = true; }
@@ -472,23 +404,13 @@ class GlassWindow {
             const [x, y] = this.toLocal(e);
             this.light = { x: x / this.w, y: y / this.h, active: true };
             this.hover = e.target === this.canvas && this.insideRim(x, y) ? this.delaunay.find(x, y) : -1;
-            if (!reduceMotion && Math.random() < 0.35) {
-                this.addSparkle(x + rand(-14, 14) * this.dpr, y + rand(-14, 14) * this.dpr, { size: rand(4, 9), max: rand(25, 45) });
-            }
+            if (reduceMotion) this.sparkles = [];
+            frame?.light(e.clientX, e.clientY);
         });
-        document.addEventListener('pointerleave', () => {
-            this.light.active = false;
-            this.hover = -1;
-        });
+        document.addEventListener('pointerleave', () => { this.hover = -1; });
         this.canvas.addEventListener('click', (e) => {
             if (!this.delaunay) return;
             const [x, y] = this.toLocal(e);
-            if (!reduceMotion) {
-                for (let i = 0; i < 18; i++) {
-                    const a = rand(0, Math.PI * 2), v = rand(1, 5) * this.dpr;
-                    this.addSparkle(x, y, { vx: Math.cos(a) * v, vy: Math.sin(a) * v, size: rand(5, 12), max: rand(30, 60) });
-                }
-            }
             if (this.insideRim(x, y)) this.spread(this.delaunay.find(x, y));
         });
     }
@@ -551,29 +473,91 @@ function addRose() {
     if (icon) icon.href = 'data:image/svg+xml,' + encodeURIComponent(roseSvg(64));
 }
 
-/* Colored light from the window falling across the clear pane in the middle. */
-function addCastLight() {
-    const pane = document.querySelector('.container');
-    if (!pane) return;
+/* The text sits on a clear pane shaped like a pointed arch, rimmed in lead with a fillet of gold glass. */
+const SVG_NS = 'http://www.w3.org/2000/svg';
 
-    const twinkles = document.createElement('div');
-    twinkles.className = 'twinkles';
-    twinkles.setAttribute('aria-hidden', 'true');
-    const n = window.innerWidth < 600 ? 8 : 14;
-    for (let i = 0; i < n; i++) {
-        const star = document.createElement('span');
-        const edge = i % 4;
-        const along = rand(4, 96);
-        const inset = rand(1.5, 5);
-        star.style.left = `${edge === 0 ? inset : edge === 1 ? 100 - inset : along}%`;
-        star.style.top = `${edge === 2 ? inset + 6 : edge === 3 ? 100 - inset : along}%`;
-        star.style.setProperty('--c', pick(['#ffb020', '#ff4f9a', '#13b9c9', '#8a3cf0', '#ffd23f', '#2b8fe0']));
-        star.style.setProperty('--s', `${rand(11, 20)}px`);
-        star.style.animationDuration = `${rand(2.4, 4.8)}s`;
-        star.style.animationDelay = `${-rand(0, 5)}s`;
-        twinkles.appendChild(star);
-    }
-    pane.prepend(twinkles);
+/* A pointed arch from two circular arcs springing at `spring`; `d` insets it as a parallel line. */
+function arch(W, H, I, spring, rise, d = 0) {
+    const a = W / 2 - I;
+    const r = (a * a + rise * rise) / (2 * a);
+    const cl = I + r, rr = r - d;
+    const mid = W / 2;
+    const apex = spring - Math.sqrt(rr * rr - (mid - cl) ** 2);
+    const xl = I + d, xr = W - I - d, bottom = H - I - d;
+    const f = (n) => n.toFixed(1);
+    return {
+        path: `M${f(xl)} ${f(bottom)} L${f(xl)} ${f(spring)} A${f(rr)} ${f(rr)} 0 0 1 ${f(mid)} ${f(apex)} A${f(rr)} ${f(rr)} 0 0 1 ${f(xr)} ${f(spring)} L${f(xr)} ${f(bottom)} Z`,
+        /* Half the clear width at height y. */
+        halfWidth: (y) => (y >= spring ? mid - xl : y <= apex ? 0 : mid - (cl - Math.sqrt(rr * rr - (spring - y) ** 2))),
+        apex,
+    };
+}
+
+function el(tag, attrs, parent) {
+    const node = document.createElementNS(SVG_NS, tag);
+    for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+    parent?.appendChild(node);
+    return node;
+}
+
+function addPaneFrame() {
+    const pane = document.querySelector('.container');
+    if (!pane) return null;
+    const glass = document.createElement('div');
+    glass.className = 'pane-glass';
+    const svg = el('svg', { class: 'pane-frame', 'aria-hidden': 'true' });
+    pane.prepend(glass, svg);
+    let last = '';
+
+    const draw = () => {
+        const W = pane.clientWidth, H = pane.clientHeight;
+        const small = W < 520;
+        const I = small ? 4 : 6;
+        const fillet = small ? 6 : 8;
+        const rise = (W / 2 - I) * (small ? 1.2 : 1.15);
+        const spring = I + rise;
+        const outerArch = arch(W, H, I, spring, rise);
+        const innerArch = arch(W, H, I, spring, rise, fillet);
+        /* Start the text where the arch is wide enough for the tabs. */
+        const nav = pane.querySelector('.header-links');
+        const tabs = nav ? [...nav.children].map((c) => c.getBoundingClientRect()) : [];
+        const tabsWidth = tabs.length ? Math.max(...tabs.map((r) => r.right)) - Math.min(...tabs.map((r) => r.left)) : 320;
+        const need = tabsWidth / 2 + (small ? 16 : 30);
+        let top = innerArch.apex;
+        while (top < spring && innerArch.halfWidth(top) < need) top += 2;
+        top = Math.max(top, I + rise * 0.3);
+        pane.style.paddingTop = `${Math.round(top)}px`;
+        /* Then push the paragraphs down to where the arch is as wide as the text. */
+        const text = pane.querySelector('.content');
+        const textHalf = text ? text.clientWidth / 2 + 6 : W / 2;
+        let body = top;
+        while (body < spring && innerArch.halfWidth(body) < textHalf) body += 2;
+        if (nav) nav.style.marginBottom = `${Math.max(0, Math.round(body - top - nav.offsetHeight - 24))}px`;
+        const key = `${W}x${H}`;
+        if (key === last) return;
+        last = key;
+
+        svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+        svg.setAttribute('width', W);
+        svg.setAttribute('height', H);
+        svg.replaceChildren();
+        glass.style.clipPath = `path('${innerArch.path}')`;
+        el('path', { d: `${outerArch.path} ${innerArch.path}`, 'fill-rule': 'evenodd', fill: '#f6dc8a' }, svg);
+        el('path', { d: outerArch.path, fill: 'none', stroke: LEAD, 'stroke-width': small ? 5 : 6, 'stroke-linejoin': 'round' }, svg);
+        el('path', { d: innerArch.path, fill: 'none', stroke: LEAD, 'stroke-width': small ? 2 : 2.5, 'stroke-linejoin': 'round' }, svg);
+    };
+
+    new ResizeObserver(draw).observe(pane);
+    draw();
+
+    return {
+        /* Sunlight from the cursor falls across the clear pane too. */
+        light(clientX, clientY) {
+            const r = pane.getBoundingClientRect();
+            glass.style.setProperty('--lx', `${clientX - r.left}px`);
+            glass.style.setProperty('--ly', `${clientY - r.top}px`);
+        },
+    };
 }
 
 /* A thin leaded strip of glass under each section heading. */
@@ -594,7 +578,7 @@ function addCames() {
 }
 
 addRose();
-addCastLight();
+const frame = addPaneFrame();
 addCames();
 
 const bg = document.querySelector('.glass-bg');

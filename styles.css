@@ -37,7 +37,7 @@ a {
 }
 
 .container {
-    max-width: 660px;
+    max-width: 740px;
 }
 
 .content {
@@ -194,38 +194,37 @@ a {
     touch-action: manipulation;
 }
 
-/* The text sits on clear glass drawn into the window itself. */
+/* The text sits on a clear pointed-arch pane; glass.js draws its outline and sets the top padding. */
 .container {
     position: relative;
     z-index: 1;
     min-height: 0;
-    margin: 6vh auto;
-    padding: 2.6rem 2.6rem 2.2rem;
-    text-shadow: 0 0 12px rgba(255, 252, 245, 0.9);
+    margin: 5vh auto;
+    padding: 260px 3.4rem 3rem;
 }
 
-.twinkles {
+.pane-frame {
     position: absolute;
     inset: 0;
     z-index: 0;
     pointer-events: none;
+    filter: drop-shadow(0 10px 24px rgba(10, 6, 30, 0.45));
 }
 
-.twinkles span {
+.pane-glass {
+    --lx: 20%;
+    --ly: 10%;
     position: absolute;
-    width: var(--s);
-    height: var(--s);
-    margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2);
-    background: var(--c);
-    clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%);
-    filter: drop-shadow(0 0 4px var(--c));
-    animation: twinkle 3.5s ease-in-out infinite;
-}
-
-@keyframes twinkle {
-    0%, 100% { transform: scale(0.2) rotate(0deg); opacity: 0; }
-    45% { transform: scale(1) rotate(45deg); opacity: 0.95; }
-    60% { transform: scale(0.7) rotate(60deg); opacity: 0.6; }
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(circle 420px at var(--lx) var(--ly), rgba(255, 238, 190, 0.28), rgba(255, 238, 190, 0) 70%),
+        linear-gradient(118deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0) 58%, rgba(255, 255, 255, 0.35) 66%, rgba(255, 255, 255, 0) 74%),
+        rgba(250, 248, 242, 0.84);
+    -webkit-backdrop-filter: blur(9px) saturate(1.3);
+    backdrop-filter: blur(9px) saturate(1.3);
+    box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.6);
 }
 
 .highlight-link:hover,
@@ -355,14 +354,13 @@ a {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .twinkles span { animation: none; opacity: 0.7; transform: scale(0.8); }
     .rose { transition: none; }
 }
 
 @media (max-width: 520px) {
     .container {
-        margin: 14px;
-        padding: 2rem 1.3rem 1.6rem;
+        margin: 12px;
+        padding: 140px 1.6rem 2.2rem;
     }
 
     .header-links {
