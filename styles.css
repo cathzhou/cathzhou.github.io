@@ -25,8 +25,8 @@ body {
     font-family: 'Newsreader', Georgia, 'Times New Roman', serif;
     color: var(--text-color);
     background-color: #1a1240;
-    font-size: 19px;
-    line-height: 1.35;
+    font-size: 20px;
+    line-height: 1.4;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -37,7 +37,7 @@ a {
 }
 
 .container {
-    max-width: 740px;
+    width: min(1060px, 84vw);
 }
 
 .content {
@@ -200,7 +200,7 @@ a {
     z-index: 1;
     min-height: 0;
     margin: 5vh auto;
-    padding: 260px 3.4rem 3rem;
+    padding: 200px 4.5rem 3rem;
 }
 
 .pane-frame {
@@ -348,6 +348,7 @@ a {
 
 @media (max-width: 520px) {
     .container {
+        width: auto;
         margin: 12px;
         padding: 140px 1.6rem 2.2rem;
     }

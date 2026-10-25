@@ -5,22 +5,29 @@ const LEAD = '#141018';
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const hasMouse = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
-/* Color ramps from a sunlit tree window, each running from the light outward into shadow. */
-const SKY = ['#fff6c8', '#d8f0ff', '#b0e0ff', '#8fd0ff', '#5ab8f0', '#3f9ae8', '#3f7cf0', '#4a5fe0', '#5546d0', '#5a32b8', '#4a2196'];
-const LEAF = ['#fff1a1', '#f2e45a', '#d6ec5a', '#b0e04a', '#7fd03b', '#4cb848', '#24a148', '#1d8a5a', '#16706a', '#1f5a7a'];
-const BARK = ['#f6c050', '#e09a30', '#b8682a', '#8a4a3a', '#5a2f5e', '#4a2470', '#3a1f6a', '#2a1650', '#1e1240'];
-const GROUND = ['#ff5fa2', '#e0307a', '#d4143c', '#c2185b', '#9b2a9a', '#8a3cf0', '#6a2fd0', '#4a2fb0', '#2b3fe0'];
-const PALETTE = [...SKY.slice(2, 9), ...LEAF.slice(1, 7), ...GROUND.slice(0, 6)].map((c) => [c, 1]);
+/* Palettes taken from the reference window. */
+const RAY = [['#fffaf0', 3], ['#fff3c4', 3], ['#fde68a', 2], ['#f9d342', 1.2], ['#cfeefa', 1.5], ['#a7dcf2', 1], ['#fbe3b0', 1.2], ['#e9f6c8', 0.8], ['#f7c6d6', 0.35]];
+const RAY_WARM = [['#fde68a', 2], ['#f9d342', 2], ['#ffe9a6', 2], ['#fff3c4', 2], ['#f6b93b', 0.6]];
+const FACE = ['#1e2a8a', '#2b3fe0', '#3f6ee8', '#5a8ff0', '#7fb3f5', '#a9d4f7', '#6a4fc8', '#8a6fe0', '#4a2fb0', '#b9a6f0', '#dfe8f7', '#3fb6d9'];
+const FACE_ACCENT = ['#e8318a', '#ffd23f', '#f59fc2', '#ffe9a6', '#ff5fa2'];
+const WARM_FLOWER = { base: ['#b5122b', '#d81f26', '#7a1f1a', '#e2462a', '#f47b20', '#5a1a12', '#d81f26'], tip: ['#ffd93b', '#fff1c9', '#f9a825', '#f47b20', '#ffe36e', '#ffd93b', '#f25c78'] };
+const PINK_FLOWER = { base: ['#c2185b', '#e0307a', '#9b2a6a', '#d81f26'], tip: ['#ffd1e0', '#ff8fb3', '#fff1c9', '#ffd93b'] };
+const LEAF = ['#0f5e2a', '#1d7a32', '#2e9a3a', '#4cb848', '#7fd03b', '#b0e04a', '#d6ec5a'];
+const BORDER = ['#d81f26', '#e2462a', '#f47b20', '#c41e3a', '#e8457a', '#ff8fb3', '#ffd23f', '#b5122b', '#f9a03f'];
+const BORDER_COOL = ['#2a5fe1', '#3f8ae8', '#6a4fc8', '#ff8fb3'];
+const PALETTE = [...BORDER, ...LEAF.slice(2), ...FACE.slice(1, 8)].map((c) => [c, 1]);
 
 const rand = (a, b) => a + Math.random() * (b - a);
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const polar = ([cx, cy], a, r) => [cx + Math.cos(a) * r, cy + Math.sin(a) * r];
 
-function weighted() {
-    const total = PALETTE.reduce((s, [, w]) => s + w, 0);
+function weightedFrom(list) {
+    const total = list.reduce((s, [, w]) => s + w, 0);
     let r = Math.random() * total;
-    for (const [c, w] of PALETTE) if ((r -= w) <= 0) return c;
-    return PALETTE[0][0];
+    for (const [c, w] of list) if ((r -= w) <= 0) return c;
+    return list[0][0];
 }
+const weighted = () => weightedFrom(PALETTE);
 
 function hexToHsl(hex) {
     const n = parseInt(hex.slice(1), 16);
@@ -36,7 +43,7 @@ function hexToHsl(hex) {
 
 function jewelHsl(hex, jitter = 0.07) {
     const [h, s, l] = hexToHsl(hex);
-    const ll = Math.min(0.94, Math.max(0.2, l + rand(-jitter, jitter)));
+    const ll = Math.min(0.96, Math.max(0.12, l + rand(-jitter, jitter)));
     return `hsl(${(h + rand(-6, 6)).toFixed(1)} ${(Math.min(1, s * rand(0.95, 1.12)) * 100).toFixed(1)}% ${(ll * 100).toFixed(1)}%)`;
 }
 
@@ -47,11 +54,34 @@ function makeNoise(size = 128) {
     const x = c.getContext('2d');
     const data = x.createImageData(size, size);
     for (let i = 0; i < data.data.length; i += 4) {
-        const v = 128 + rand(-55, 55);
+        const v = 128 + rand(-60, 60);
         data.data[i] = data.data[i + 1] = data.data[i + 2] = v;
         data.data[i + 3] = 255;
     }
     x.putImageData(data, 0, 0);
+    return c;
+}
+
+/* Soft blotches, like the mottling in painted glass. */
+function makeMottle(size = 512) {
+    const c = document.createElement('canvas');
+    c.width = c.height = size;
+    const x = c.getContext('2d');
+    x.imageSmoothingEnabled = true;
+    for (const [cells, alpha] of [[10, 1], [28, 0.6], [70, 0.35]]) {
+        const s = document.createElement('canvas');
+        s.width = s.height = cells;
+        const sx = s.getContext('2d');
+        const data = sx.createImageData(cells, cells);
+        for (let i = 0; i < data.data.length; i += 4) {
+            const v = 128 + rand(-70, 70);
+            data.data[i] = data.data[i + 1] = data.data[i + 2] = v;
+            data.data[i + 3] = 255;
+        }
+        sx.putImageData(data, 0, 0);
+        x.globalAlpha = alpha;
+        x.drawImage(s, 0, 0, size, size);
+    }
     return c;
 }
 
@@ -76,12 +106,24 @@ function makeRipples(size = 256) {
     return c;
 }
 
-/* The window behind the whole page: trees in leaded glass, branches spreading against the sky. */
+function polyPath(poly) {
+    const p = new Path2D();
+    poly.forEach(([x, y], i) => (i ? p.lineTo(x, y) : p.moveTo(x, y)));
+    p.closePath();
+    return p;
+}
+
+/*
+ * The window behind the whole page, after "Impressionable": a great roundel ringed in heavy lead with warm panes
+ * between thick spokes outside it; inside, pale rays stream out from behind the text, chrysanthemums and leaves
+ * crowd the left, and faceted blue-violet glass sits on the right.
+ */
 class GlassWindow {
     constructor(canvas) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
         this.noise = makeNoise();
+        this.mottle = makeMottle();
         this.ripples = makeRipples();
         this.light = { x: 0.22, y: 0.2, active: hasMouse };
         this.hover = -1;
@@ -99,47 +141,6 @@ class GlassWindow {
         this.build();
     }
 
-    /* Grow branching trees; each branch is a tapered segment, each twig tip carries a cluster of leaves. */
-    growTrees(w, h, small, dpr) {
-        const ground = h * (small ? 0.9 : 0.86);
-        const roots = small ? [[0.5, 1]] : [[0.17, 1], [0.84, 0.92]];
-        const branches = [], leaves = [];
-        const grow = (x, y, ang, len, thick, depth) => {
-            const x2 = x + Math.cos(ang) * len, y2 = y + Math.sin(ang) * len;
-            branches.push({ x1: x, y1: y, x2, y2, t1: thick, t2: thick * 0.72 });
-            if (depth === 0 || thick < 7 * dpr) {
-                leaves.push({ x: x2, y: y2, r: len * rand(1.3, 1.9) + 50 * dpr });
-                return;
-            }
-            const kids = depth > 3 ? 2 : pick([2, 2, 3]);
-            for (let k = 0; k < kids; k++) {
-                const spread = kids === 2 ? (k ? 1 : -1) * rand(0.32, 0.62) : (k - 1) * rand(0.45, 0.7);
-                /* Branches bend toward the horizontal so the crown spreads wide. */
-                const a = ang + spread + (ang < -Math.PI / 2 ? -0.08 : 0.08);
-                grow(x2, y2, a, len * rand(0.68, 0.8), thick * 0.68, depth - 1);
-            }
-            if (depth <= 2) leaves.push({ x: x2, y: y2, r: len * 1.1 });
-        };
-        const scale = Math.min(w, h * 1.4);
-        for (const [fx, size] of roots) {
-            const x = (fx + rand(-0.02, 0.02)) * w;
-            const lean = (0.5 - fx) * 0.25 + rand(-0.05, 0.05);
-            const thick = scale * 0.09 * size;
-            grow(x, ground + 20 * dpr, -Math.PI / 2 + lean, h * 0.32 * size, thick, small ? 5 : 6);
-            /* Roots flare out across the floor. */
-            for (const side of [-1, 1]) {
-                for (let k = 0; k < 2; k++) {
-                    const a = Math.PI / 2 + side * rand(1.05, 1.35) - side * k * 0.35;
-                    const len = h * rand(0.08, 0.13) * (k ? 0.7 : 1);
-                    const y = ground - thick * 0.15;
-                    branches.push({ x1: x, y1: y, x2: x + Math.cos(a) * len, y2: y + Math.sin(a) * len, t1: thick * (k ? 0.35 : 0.5), t2: thick * 0.1 });
-                }
-            }
-        }
-        leaves.forEach((l) => { l.p = rand(0, 6.3); l.k = pick([4, 5, 6, 7]); });
-        return { ground, branches, leaves };
-    }
-
     build() {
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
         const w = Math.round(this.canvas.clientWidth * dpr), h = Math.round(this.canvas.clientHeight * dpr);
@@ -148,204 +149,302 @@ class GlassWindow {
         this.w = w; this.h = h; this.dpr = dpr;
 
         const small = window.innerWidth < 600;
-        const { ground, branches, leaves } = this.trees = this.growTrees(w, h, small, dpr);
-        const glowAt = [w * rand(0.35, 0.65), h * rand(0.25, 0.45)];
-
-        /* How far a point sits outside the nearest branch (negative inside the wood). */
-        const barkGap = (x, y) => {
-            let best = Infinity;
-            for (const b of branches) {
-                const dx = b.x2 - b.x1, dy = b.y2 - b.y1;
-                const t = Math.max(0, Math.min(1, ((x - b.x1) * dx + (y - b.y1) * dy) / (dx * dx + dy * dy)));
-                const half = (b.t1 + (b.t2 - b.t1) * t) / 2;
-                best = Math.min(best, Math.hypot(x - (b.x1 + dx * t), y - (b.y1 + dy * t)) - half);
-            }
-            return best;
-        };
-        const leafAt = (x, y) => leaves.some((l) => {
-            const d = Math.hypot(x - l.x, y - l.y);
-            return d < l.r * (0.84 + 0.16 * Math.sin(Math.atan2(y - l.y, x - l.x) * l.k + l.p));
-        });
-        const outside = (x, y) => (y > ground ? 'ground' : leafAt(x, y) ? 'leaf' : 'sky');
-
-        const points = [], meta = [];
-        const add = (x, y, kind) => { points.push([x, y]); meta.push(kind); };
-        const onScreen = (x, y) => x > -40 * dpr && y > -40 * dpr && x < w + 40 * dpr && y < h + 40 * dpr;
-
-        /* Seeds in pairs just inside and just outside each branch, so a lead line runs along the edge of the wood. */
-        const s = (small ? 14 : 18) * dpr;
-        for (const b of branches) {
-            const len = Math.hypot(b.x2 - b.x1, b.y2 - b.y1);
-            const nx = -(b.y2 - b.y1) / len, ny = (b.x2 - b.x1) / len;
-            for (let d = 0; d < len; d += s * rand(1.1, 1.6)) {
-                const t = d / len;
-                const half = (b.t1 + (b.t2 - b.t1) * t) / 2;
-                const cx = b.x1 + (b.x2 - b.x1) * t, cy = b.y1 + (b.y2 - b.y1) * t;
-                for (const side of [-1, 1]) {
-                    const ix = cx + nx * side * Math.max(0, half - s * 0.45), iy = cy + ny * side * Math.max(0, half - s * 0.45);
-                    if ((half > s * 0.5 || side > 0) && barkGap(ix, iy) < 0) add(ix, iy, 'bark');
-                    const ox = cx + nx * side * (half + s * 0.45), oy = cy + ny * side * (half + s * 0.45);
-                    if (barkGap(ox, oy) > s * 0.3) add(ox, oy, outside(ox, oy));
-                }
-                /* Wide trunks get a few pieces across their middle too. */
-                const across = Math.floor((half * 2) / (s * 1.6));
-                for (let k = 1; half * 2 > s * 2.6 && k < across; k++) {
-                    const off = -half + (k * half * 2) / across + rand(-0.2, 0.2) * s;
-                    add(cx + nx * off, cy + ny * off, 'bark');
-                }
-            }
-        }
-
-        /* Sky: long shards fanning out from the glow like rays of light. */
-        const [gx, gy] = glowAt;
+        const S = Math.min(w, h * 1.6);
+        const C = [w / 2, h / 2];
+        const R = Math.min(Math.max(w, h) * 0.5, Math.hypot(w, h) * 0.44);
         const far = Math.hypot(w, h);
-        const tsp = (small ? 22 : 28) * dpr;
-        for (let r = tsp * 0.6; r < far; ) {
-            const span = tsp * (1 + (r / far) * 0.9);
-            const n = Math.max(6, Math.round((Math.PI * 2 * r) / span));
-            const off = rand(0, 1);
-            for (let j = 0; j < n; j++) {
-                const a = ((j + off + rand(-0.18, 0.18)) / n) * Math.PI * 2;
-                const rr = r + rand(-0.25, 0.25) * span;
-                const x = gx + Math.cos(a) * rr, y = gy + Math.sin(a) * rr;
-                if (!onScreen(x, y) || y > ground || barkGap(x, y) < s * 1.1 || leafAt(x, y)) continue;
-                add(x, y, 'sky');
-            }
-            r += span * rand(2, 2.6);
+        const circle = new Path2D();
+        circle.arc(C[0], C[1], R, 0, Math.PI * 2);
+        const inCircle = (x, y) => Math.hypot(x - C[0], y - C[1]) < R;
+        const onScreen = (x, y) => x > -10 && y > -10 && x < w + 10 && y < h + 10;
+        const pieces = [];
+        const add = (p) => {
+            p.path = p.path || polyPath(p.poly);
+            pieces.push(p);
+        };
+
+        /* Rays: long pale streaks flowing out from behind the text, each one waving a little. */
+        const F = [w * 0.55, h * 0.42];
+        const bounds = [];
+        for (let a = rand(0, 0.05); a < Math.PI * 2 - 0.03; a += rand(0.025, 0.065)) {
+            bounds.push({ a, k: rand(0.004, 0.01) / dpr, ph: rand(0, 6.3), amp: rand(0.015, 0.05) });
         }
-        /* Leaves: small, irregular pieces. */
-        const leafCell = (small ? 18 : 22) * dpr;
-        for (let y = leafCell / 2; y < ground; y += leafCell * 0.86) {
-            for (let x = leafCell / 2; x < w + leafCell; x += leafCell) {
-                const px = x + rand(-0.45, 0.45) * leafCell, py = y + rand(-0.45, 0.45) * leafCell;
-                if (py < ground && leafAt(px, py) && barkGap(px, py) > s * 1.1) add(px, py, 'leaf');
-            }
-        }
-        /* Floor: wide bands, getting larger toward the bottom. */
-        for (let y = ground, row = 26 * dpr; y < h + row; y += row, row *= 1.18) {
-            const off = rand(0, 1);
-            for (let x = -row * 2; x < w + row * 2; x += row * rand(2, 2.8)) {
-                const px = x + off * row, py = y + row * (0.5 + rand(-0.2, 0.2));
-                if (barkGap(px, py) > s * 1.1) add(px, py, 'ground');
+        const bend = (b, r) => b.a + Math.sin(r * b.k + b.ph) * b.amp * Math.min(1, r / (120 * dpr));
+        for (let i = 0; i < bounds.length; i++) {
+            const b0 = bounds[i], b1 = bounds[(i + 1) % bounds.length];
+            const wrap = i === bounds.length - 1 ? Math.PI * 2 : 0;
+            for (let r = rand(10, 40) * dpr; r < far; ) {
+                const r1 = r + rand(70, 240) * dpr * (0.6 + r / R);
+                const poly = [];
+                for (let q = r; q < r1; q += 14 * dpr) poly.push(polar(F, bend(b0, q), q));
+                poly.push(polar(F, bend(b0, r1), r1));
+                for (let q = r1; q > r; q -= 14 * dpr) poly.push(polar(F, bend(b1, q) + wrap, q));
+                poly.push(polar(F, bend(b1, r) + wrap, r));
+                if (poly.some(([x, y]) => inCircle(x, y) && onScreen(x, y))) {
+                    const [mx, my] = poly[Math.floor(poly.length / 4)];
+                    const warm = my < F[1] - h * 0.12 || Math.random() < 0.15;
+                    add({ poly, fill: jewelHsl(weightedFrom(warm ? RAY_WARM : RAY), 0.03), clips: [circle], lead: 1.5 });
+                }
+                r = r1;
             }
         }
 
-        this.points = points;
-        this.meta = meta;
-        this.delaunay = Delaunay.from(points);
-        this.voronoi = this.delaunay.voronoi([0, 0, w, h]);
-        /* Colors follow smooth fields rather than chance: light near the glow, deepening outward, with slow drifts of hue. */
-        const ph = Array.from({ length: 4 }, () => rand(0, Math.PI * 2));
-        const k = 1 / (240 * dpr);
-        const noise = (x, y) => (Math.sin(x * k + ph[0]) + Math.sin(y * k * 1.3 + ph[1])
-            + Math.sin((x * 0.7 - y) * k * 0.8 + ph[2]) + 0.5 * Math.sin((x + y) * k * 2.1 + ph[3])) / 3.5;
-        const fromRamp = (ramp, t, spread = 1) => {
-            const i = Math.round(Math.min(1, Math.max(0, t)) * (ramp.length - 1) + rand(-spread, spread));
-            return ramp[Math.min(ramp.length - 1, Math.max(0, i))];
+        /* Faceted blue-violet glass on the right, like the face in the reference, outlined in one smooth line. */
+        const face = small
+            ? { x: w * 1.02, y: h * 0.55, rx: w * 0.32, ry: h * 0.28 }
+            : { x: w * 0.92, y: h * 0.54, rx: w * 0.16, ry: h * 0.42 };
+        const faceClip = new Path2D();
+        faceClip.ellipse(face.x, face.y, face.rx, face.ry, 0, 0, Math.PI * 2);
+        const fs = (small ? 44 : 62) * dpr;
+        const seeds = [];
+        for (let y = face.y - face.ry; y < face.y + face.ry + fs; y += fs * 0.8) {
+            for (let x = face.x - face.rx; x < face.x + face.rx + fs; x += fs * rand(0.7, 1.4)) {
+                seeds.push([x + rand(-0.4, 0.4) * fs, y + rand(-0.4, 0.4) * fs]);
+            }
+        }
+        /* Triangulate rather than tile, so the pieces come out as angular shards. */
+        const fd = Delaunay.from(seeds);
+        for (let i = 0; i < fd.triangles.length / 3; i++) {
+            const poly = fd.trianglePolygon(i);
+            const sx = (poly[0][0] + poly[1][0] + poly[2][0]) / 3, sy = (poly[0][1] + poly[1][1] + poly[2][1]) / 3;
+            const inside = ((sx - face.x) / face.rx) ** 2 + ((sy - face.y) / face.ry) ** 2 < 1.15;
+            if (!inside || !poly.some(([x, y]) => inCircle(x, y) && onScreen(x, y))) continue;
+            /* Deeper violet to the lower left, paler blue to the upper right, with a few bright accents. */
+            const t = Math.min(1, Math.max(0, 0.5 + ((sx - face.x) / face.rx) * 0.35 - ((sy - face.y) / face.ry) * 0.35 + rand(-0.3, 0.3)));
+            const c = Math.random() < 0.08 ? pick(FACE_ACCENT) : FACE[Math.min(FACE.length - 1, Math.floor(t * FACE.length))];
+            add({ poly: poly.slice(0, -1), fill: jewelHsl(c, 0.05), clips: [circle, faceClip], lead: 1.6 });
+        }
+        const outlines = [{ path: faceClip, width: 5, clip: circle }];
+
+        /* Leaves: two halves split by a leaded midrib, dark at the stem and bright at the tip. */
+        const leaf = (bx, by, a, L, W) => {
+            const tx = bx + Math.cos(a) * L, ty = by + Math.sin(a) * L;
+            const mx = bx + Math.cos(a) * L * 0.45, my = by + Math.sin(a) * L * 0.45;
+            const nx = -Math.sin(a), ny = Math.cos(a);
+            for (const side of [1, -1]) {
+                const cx = mx + nx * W * side * 1.3, cy = my + ny * W * side * 1.3;
+                const path = new Path2D();
+                path.moveTo(bx, by);
+                path.quadraticCurveTo(cx, cy, tx, ty);
+                path.closePath();
+                const dark = side < 0 ? 0 : 1;
+                add({
+                    path,
+                    poly: [[bx, by], [mx + nx * W * side * 0.65, my + ny * W * side * 0.65], [tx, ty]],
+                    fill: { from: [bx, by], to: [tx, ty], c0: jewelHsl(LEAF[dark], 0.04), c1: jewelHsl(LEAF[4 + dark + Math.floor(rand(0, 1.99))], 0.05) },
+                    clips: [circle], lead: 1.8,
+                });
+            }
         };
-        const reach = Math.max(w, h) * 0.85;
-        this.base = meta.map((kind, i) => {
-            const [x, y] = points[i];
-            const d = Math.hypot(x - gx, y - gy) / reach, n = noise(x, y);
-            if (kind === 'bark') return jewelHsl(fromRamp(BARK, 0.15 + d * 1.5 + n * 0.15, 0.8), 0.04);
-            if (kind === 'ground') return jewelHsl(fromRamp(GROUND, 0.5 + n * 0.6, 1.2), 0.05);
-            if (kind === 'leaf') return jewelHsl(fromRamp(LEAF, d * 1.25 + n * 0.25, 1), 0.04);
-            return jewelHsl(fromRamp(SKY, d * 0.82 + n * 0.18, 0.9), 0.04);
-        });
-        this.glowAt = glowAt;
+
+        /* Chrysanthemums: rings of curled petals, outermost first, each petal shading from its base to its tip. */
+        const flower = (cx, cy, Rf, pal) => {
+            const sy = rand(0.8, 1), rot = rand(0, Math.PI * 2), swirl = pick([-1, 1]) * rand(0.15, 0.3);
+            const P = (a, r) => {
+                const x = Math.cos(a) * r, y = Math.sin(a) * r * sy;
+                return [cx + x * Math.cos(rot) - y * Math.sin(rot), cy + x * Math.sin(rot) + y * Math.cos(rot)];
+            };
+            for (let k = 0; k < 9; k++) {
+                const a = rand(0, Math.PI * 2);
+                leaf(...P(a, Rf * 0.5), a + rot + rand(-0.3, 0.3), Rf * rand(0.9, 1.4), Rf * rand(0.22, 0.32));
+            }
+            const rings = 8;
+            for (let j = 0; j < rings; j++) {
+                const f = 1 - j / (rings + 0.5);
+                const r1 = Rf * f, r0 = Rf * f * 0.42;
+                const n = Math.round(9 + 11 * f);
+                const hw = (Math.PI / n) * 1.55;
+                const off = rand(0, Math.PI * 2);
+                for (let i = 0; i < n; i++) {
+                    const a = off + (i / n) * Math.PI * 2 + rand(-0.08, 0.08);
+                    const curl = swirl * (0.6 + f);
+                    const rm = r0 + (r1 - r0) * 0.6;
+                    const bl = P(a - hw * 0.3, r0), br = P(a + hw * 0.3, r0), tip = P(a + curl, r1 * rand(0.92, 1.05));
+                    const cl = P(a - hw, rm), cr = P(a + hw, rm);
+                    const path = new Path2D();
+                    path.moveTo(...bl);
+                    path.quadraticCurveTo(...cl, ...tip);
+                    path.quadraticCurveTo(...cr, ...br);
+                    path.closePath();
+                    const inner = j >= rings - 2;
+                    add({
+                        path,
+                        poly: [bl, P(a - hw * 0.5, rm), tip, P(a + hw * 0.5, rm), br],
+                        fill: {
+                            from: P(a, r0), to: tip,
+                            c0: jewelHsl(pick(pal.base), 0.05),
+                            c1: jewelHsl(inner && Math.random() < 0.5 ? pick(pal.base) : pick(pal.tip), 0.05),
+                        },
+                        clips: [circle], lead: 1.6,
+                    });
+                }
+            }
+            const disc = Rf * 0.13;
+            const core = new Path2D();
+            core.ellipse(cx, cy, disc, disc * sy, rot, 0, Math.PI * 2);
+            add({ path: core, poly: [P(0, disc), P(2.1, disc), P(4.2, disc)], fill: jewelHsl('#4a1c10', 0.04), clips: [circle], lead: 1.6 });
+            for (let i = 0; i < 7; i++) {
+                const [x, y] = P(rand(0, Math.PI * 2), disc * rand(0, 0.65));
+                const r = disc * rand(0.16, 0.24);
+                const seed = new Path2D();
+                seed.arc(x, y, r, 0, Math.PI * 2);
+                add({ path: seed, poly: [[x - r, y], [x, y - r], [x + r, y], [x, y + r]], fill: jewelHsl('#9a948a', 0.08), clips: [circle], lead: 1 });
+            }
+        };
+
+        const blooms = small
+            ? [[0.08, 0.07, 0.3, WARM_FLOWER], [0.02, 0.36, 0.22, WARM_FLOWER], [0.12, 0.95, 0.26, WARM_FLOWER], [0.95, 0.92, 0.2, PINK_FLOWER]]
+                .map(([x, y, r, p]) => [x, y, r * w, p])
+            : [[0.1, 0.22, 0.135, WARM_FLOWER], [0.06, 0.6, 0.125, WARM_FLOWER], [0.2, 0.93, 0.095, WARM_FLOWER], [0.22, 0.04, 0.07, PINK_FLOWER], [0.9, 0.93, 0.08, PINK_FLOWER]]
+                .map(([x, y, r, p]) => [x, y, r * S, p]);
+        for (let k = 0; k < (small ? 6 : 14); k++) {
+            const [fx, fy, fr] = pick(blooms.slice(0, 3));
+            const a = rand(0, Math.PI * 2);
+            leaf(fx * w + Math.cos(a) * fr * 0.9, fy * h + Math.sin(a) * fr * 0.9, a + rand(-0.6, 0.6), fr * rand(0.7, 1.2), fr * rand(0.2, 0.3));
+        }
+        for (const [fx, fy, fr, pal] of blooms) flower(fx * w, fy * h, fr, pal);
+
+        /* Outside the roundel: big warm panes between heavy spokes. */
+        const nb = small ? 12 : 16, step = (Math.PI * 2) / nb, off = rand(0, step);
+        const spokes = [];
+        let last = '';
+        for (let k = 0; k < nb; k++) {
+            const a0 = off + k * step, a1 = a0 + step, am = (a0 + a1) / 2;
+            spokes.push(a0);
+            const poly = [];
+            for (let q = 0; q <= 8; q++) poly.push(polar(C, a0 + (q / 8) * step, R));
+            poly.push(polar(C, a1, far * 1.5), polar(C, a0, far * 1.5));
+            const cool = Math.sin(am) < -0.35 && Math.cos(am) > 0.15;
+            let c;
+            do c = pick(cool ? BORDER_COOL : BORDER); while (c === last);
+            last = c;
+            add({ poly, fill: jewelHsl(c, 0.06), lead: 2 });
+        }
+
+        this.pieces = pieces;
+        this.deco = { C, R, far, spokes, outlines, lead: Math.max(9 * dpr, R * 0.028) };
+        this.base = pieces.map((p) => p.fill);
         this.colors = this.base.slice();
-        this.flash = new Float32Array(points.length);
+        this.buildGrid();
         this.sparkles = [];
         this.renderGlass();
-        this.renderLead();
         if (!this.running) this.loop();
+    }
+
+    /* A coarse grid of piece indices for picking the piece under a point. */
+    buildGrid() {
+        const cell = this.cell = 64 * this.dpr;
+        const grid = this.grid = new Map();
+        this.pieces.forEach((p, i) => {
+            let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+            for (const [x, y] of p.poly) {
+                x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y);
+            }
+            const pad = Math.max(x1 - x0, y1 - y0) * 0.15;
+            p.cx = (x0 + x1) / 2; p.cy = (y0 + y1) / 2;
+            const gx0 = Math.max(0, Math.floor((x0 - pad) / cell)), gx1 = Math.min(Math.ceil(this.w / cell), Math.floor((x1 + pad) / cell));
+            const gy0 = Math.max(0, Math.floor((y0 - pad) / cell)), gy1 = Math.min(Math.ceil(this.h / cell), Math.floor((y1 + pad) / cell));
+            for (let gx = gx0; gx <= gx1; gx++) {
+                for (let gy = gy0; gy <= gy1; gy++) {
+                    const key = gx + gy * 4096;
+                    if (!grid.has(key)) grid.set(key, []);
+                    grid.get(key).push(i);
+                }
+            }
+        });
+    }
+
+    pick(x, y) {
+        const list = this.grid.get(Math.floor(x / this.cell) + Math.floor(y / this.cell) * 4096);
+        if (!list) return -1;
+        const ctx = this.ctx;
+        for (let k = list.length - 1; k >= 0; k--) {
+            const p = this.pieces[list[k]];
+            if (ctx.isPointInPath(p.path, x, y) && (!p.clips || p.clips.every((c) => ctx.isPointInPath(c, x, y)))) return list[k];
+        }
+        return -1;
     }
 
     renderGlass() {
         const { w, h, dpr } = this;
-        const [gx, gy] = this.glowAt;
         this.glass = this.glass || document.createElement('canvas');
         this.glass.width = w; this.glass.height = h;
-
         const g = this.glass.getContext('2d');
-        for (let i = 0; i < this.colors.length; i++) {
-            g.beginPath();
-            this.voronoi.renderCell(i, g);
-            g.fillStyle = this.colors[i];
-            g.fill();
-            /* Each pane is brighter on the side facing the glow. */
-            const [x0, y0, x1, y1] = this.cellBounds(i);
-            const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, rad = Math.hypot(x1 - x0, y1 - y0) / 2 || 1;
-            const len = Math.hypot(gx - cx, gy - cy) || 1;
-            const ux = (gx - cx) / len, uy = (gy - cy) / len;
-            const grad = g.createLinearGradient(cx + ux * rad, cy + uy * rad, cx - ux * rad, cy - uy * rad);
-            grad.addColorStop(0, 'rgba(255,255,255,0.3)');
-            grad.addColorStop(0.45, 'rgba(255,255,255,0)');
-            grad.addColorStop(1, this.meta[i] === 'bark' ? 'rgba(0,0,0,0.32)' : 'rgba(0,0,0,0.18)');
-            g.fillStyle = grad;
-            g.fill();
-            if (this.flash[i] > 0) {
-                g.fillStyle = `rgba(255,255,240,${this.flash[i] * 0.65})`;
-                g.fill();
+        g.lineJoin = 'round';
+        g.fillStyle = LEAD;
+        g.fillRect(0, 0, w, h);
+
+        this.pieces.forEach((p, i) => {
+            const col = this.colors[i];
+            g.save();
+            p.clips?.forEach((c) => g.clip(c));
+            if (typeof col === 'string') {
+                g.fillStyle = col;
+            } else {
+                const grad = g.createLinearGradient(...col.from, ...col.to);
+                grad.addColorStop(0, col.c0);
+                grad.addColorStop(1, col.c1);
+                g.fillStyle = grad;
             }
+            g.fill(p.path);
+            /* Glass darkens where it meets the lead. */
+            g.save();
+            g.clip(p.path);
+            g.lineWidth = 8 * dpr;
+            g.strokeStyle = 'rgba(30, 8, 30, 0.22)';
+            g.stroke(p.path);
+            g.restore();
+            g.lineWidth = p.lead * dpr;
+            g.strokeStyle = LEAD;
+            g.stroke(p.path);
+            g.restore();
+        });
+
+        const { C, R, far, spokes, outlines, lead } = this.deco;
+        for (const o of outlines) {
+            g.save();
+            g.clip(o.clip);
+            g.lineWidth = o.width * dpr;
+            g.strokeStyle = LEAD;
+            g.stroke(o.path);
+            g.restore();
         }
+        g.strokeStyle = LEAD;
+        g.lineCap = 'butt';
+        g.lineWidth = lead * 0.85;
+        for (const a of spokes) {
+            g.beginPath();
+            g.moveTo(...polar(C, a, R));
+            g.lineTo(...polar(C, a, far * 1.5));
+            g.stroke();
+        }
+        g.lineWidth = lead;
+        g.beginPath();
+        g.arc(C[0], C[1], R, 0, Math.PI * 2);
+        g.stroke();
+        /* A faint shine along the heavy lead. */
+        g.strokeStyle = 'rgba(255,255,255,0.1)';
+        g.lineWidth = 1.2 * dpr;
+        g.beginPath();
+        g.arc(C[0], C[1], R - lead * 0.3, Math.PI * 0.9, Math.PI * 1.6);
+        g.stroke();
 
         g.globalCompositeOperation = 'overlay';
-        g.globalAlpha = 0.28;
+        const mottle = g.createPattern(this.mottle, 'repeat');
+        mottle.setTransform(new DOMMatrix().scale(dpr * 1.4));
+        g.globalAlpha = 0.4;
+        g.fillStyle = mottle;
+        g.fillRect(0, 0, w, h);
+        g.globalAlpha = 0.34;
         g.fillStyle = g.createPattern(this.noise, 'repeat');
         g.fillRect(0, 0, w, h);
         const ripple = g.createPattern(this.ripples, 'repeat');
         ripple.setTransform(new DOMMatrix().rotate(-28).scale(dpr));
-        g.globalAlpha = 0.45;
+        g.globalAlpha = 0.3;
         g.fillStyle = ripple;
         g.fillRect(0, 0, w, h);
         g.globalCompositeOperation = 'source-over';
         g.globalAlpha = 1;
-    }
-
-    renderLead() {
-        const { w, h, dpr } = this;
-        this.leadLayer = this.leadLayer || document.createElement('canvas');
-        this.leadLayer.width = w; this.leadLayer.height = h;
-        const lead = new Path2D(), wood = new Path2D();
-        this.voronoi.render(lead);
-        this.meta.forEach((kind, i) => { if (kind === 'bark') this.voronoi.renderCell(i, wood); });
-
-        const l = this.leadLayer.getContext('2d');
-        l.lineJoin = 'round';
-        /* Glass darkens where it meets the lead. */
-        l.save();
-        l.filter = `blur(${2.5 * dpr}px)`;
-        l.strokeStyle = 'rgba(8, 4, 24, 0.4)';
-        l.lineWidth = 7 * dpr;
-        l.stroke(lead);
-        l.restore();
-        l.strokeStyle = LEAD;
-        l.lineWidth = 2.4 * dpr;
-        l.stroke(lead);
-        l.lineWidth = 3.6 * dpr;
-        l.stroke(wood);
-        /* A faint highlight along the top of each came. */
-        l.save();
-        l.translate(-0.6 * dpr, -0.6 * dpr);
-        l.strokeStyle = 'rgba(255, 255, 255, 0.12)';
-        l.lineWidth = 0.8 * dpr;
-        l.stroke(lead);
-        l.restore();
-    }
-
-    cellBounds(i) {
-        const poly = this.voronoi.cellPolygon(i);
-        if (!poly) return [0, 0, 1, 1];
-        let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-        for (const [x, y] of poly) {
-            x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y);
-        }
-        return [x0, y0, x1, y1];
-    }
-
-    insideRim(x, y) {
-        return x >= 0 && y >= 0 && x <= this.w && y <= this.h;
     }
 
     addSparkle(x, y, opts = {}) {
@@ -368,12 +467,11 @@ class GlassWindow {
         for (let k = 0; k < tries; k++) {
             if (Math.random() > 0.5) continue;
             const ang = rand(0, Math.PI * 2), d = reach * Math.abs(rand(-1, 1) * rand(0, 1));
-            const cell = this.delaunay.find(sx + Math.cos(ang) * d, sy + Math.sin(ang) * d);
-            const poly = this.voronoi.cellPolygon(cell);
-            if (!poly) continue;
-            const [x, y] = pick(poly);
+            const i = this.pick(sx + Math.cos(ang) * d, sy + Math.sin(ang) * d);
+            if (i < 0) continue;
+            const [x, y] = pick(this.pieces[i].poly);
             const near = 1 - Math.min(1, Math.hypot(x - sx, y - sy) / reach);
-            if (near > 0 && this.insideRim(x, y)) this.addSparkle(x, y, { size: 4 + 10 * near, max: rand(30, 70) });
+            if (near > 0) this.addSparkle(x, y, { size: 4 + 10 * near, max: rand(30, 70) });
         }
     }
 
@@ -417,8 +515,8 @@ class GlassWindow {
         const { ctx, w, h } = this;
         ctx.globalCompositeOperation = 'source-over';
         ctx.drawImage(this.glass, 0, 0);
-        /* Glass away from the sun sits deep and dim. */
-        ctx.fillStyle = 'rgba(12, 8, 30, 0.3)';
+        /* Glass away from the sun sits a little dimmer. */
+        ctx.fillStyle = 'rgba(12, 8, 30, 0.2)';
         ctx.fillRect(0, 0, w, h);
 
         /* Near the sun the glass lights up in its own colors, like light coming through it. */
@@ -438,26 +536,31 @@ class GlassWindow {
         b.fillStyle = mask;
         b.fillRect(0, 0, R * 2, R * 2);
         ctx.globalCompositeOperation = 'lighter';
-        ctx.globalAlpha = 0.6;
+        ctx.globalAlpha = 0.45;
         ctx.drawImage(buf, lx - R, ly - R);
         ctx.globalAlpha = 1;
 
         ctx.globalCompositeOperation = 'screen';
         const glow = ctx.createRadialGradient(lx, ly, 0, lx, ly, R * 0.6);
-        glow.addColorStop(0, 'rgba(255,248,225,0.55)');
-        glow.addColorStop(0.25, 'rgba(255,240,200,0.18)');
+        glow.addColorStop(0, 'rgba(255,248,225,0.5)');
+        glow.addColorStop(0.25, 'rgba(255,240,200,0.16)');
         glow.addColorStop(1, 'rgba(255,240,200,0)');
         ctx.fillStyle = glow;
         ctx.fillRect(lx - R, ly - R, R * 2, R * 2);
 
         if (this.hover >= 0) {
-            ctx.beginPath();
-            this.voronoi.renderCell(this.hover, ctx);
-            ctx.fillStyle = 'rgba(255,255,255,0.35)';
-            ctx.fill();
+            const p = this.pieces[this.hover];
+            ctx.save();
+            p.clips?.forEach((c) => ctx.clip(c));
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            ctx.fill(p.path);
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.lineWidth = p.lead * this.dpr;
+            ctx.strokeStyle = LEAD;
+            ctx.stroke(p.path);
+            ctx.restore();
         }
         ctx.globalCompositeOperation = 'source-over';
-        ctx.drawImage(this.leadLayer, 0, 0);
         this.drawSparkles();
     }
 
@@ -478,11 +581,6 @@ class GlassWindow {
             } else {
                 this.spawnGlints();
             }
-            let dirty = false;
-            for (let i = 0; i < this.flash.length; i++) {
-                if (this.flash[i] > 0) { this.flash[i] = Math.max(0, this.flash[i] - 0.04); dirty = true; }
-            }
-            if (dirty) this.renderGlass();
             this.draw();
             requestAnimationFrame(tick);
         };
@@ -496,44 +594,44 @@ class GlassWindow {
 
     bindEvents() {
         window.addEventListener('pointermove', (e) => {
-            if (!this.delaunay || e.pointerType === 'touch') return;
+            if (!this.pieces || e.pointerType === 'touch') return;
             const [x, y] = this.toLocal(e);
             this.light = { x: x / this.w, y: y / this.h, active: true };
-            this.hover = e.target === this.canvas && this.insideRim(x, y) ? this.delaunay.find(x, y) : -1;
+            this.hover = e.target === this.canvas ? this.pick(x, y) : -1;
             if (reduceMotion) this.sparkles = [];
             frame?.light(e.clientX, e.clientY);
         });
         document.addEventListener('pointerleave', () => { this.hover = -1; });
         this.canvas.addEventListener('click', (e) => {
-            if (!this.delaunay) return;
+            if (!this.pieces) return;
             const [x, y] = this.toLocal(e);
-            if (this.insideRim(x, y)) this.spread(this.delaunay.find(x, y));
+            const i = this.pick(x, y);
+            if (i >= 0) this.spread(i, x, y);
         });
     }
 
-    /* Recolor a pane, then let the color ripple outward through its neighbors. */
-    spread(start) {
+    /* Recolor a piece, then let the color ripple outward through the pieces around it. */
+    spread(start, x, y) {
         const jewel = pick(JEWELS);
-        const seen = new Set([start]);
-        let ring = [start];
-        for (let depth = 0; depth < 3 && ring.length; depth++) {
-            const current = ring;
+        const band = 50 * this.dpr;
+        const p0 = this.pieces[start];
+        const rings = [[start], [], []];
+        this.pieces.forEach((p, i) => {
+            if (i === start) return;
+            const d = Math.hypot(p.cx - p0.cx, p.cy - p0.cy);
+            if (d < band * 3 && Math.random() < 0.7) rings[Math.min(2, Math.floor(d / band))].push(i);
+        });
+        rings.forEach((ring, depth) => {
             setTimeout(() => {
-                for (const i of current) {
-                    if (depth === 0 || Math.random() < 0.7) {
-                        this.colors[i] = jewelHsl(jewel, 0.1);
-                        this.flash[i] = 1 - depth * 0.25;
-                    }
-                }
+                for (const i of ring) this.colors[i] = jewelHsl(jewel, 0.1);
                 this.renderGlass();
             }, reduceMotion ? 0 : depth * 90);
-            const next = [];
-            for (const i of current) {
-                for (const j of this.delaunay.neighbors(i)) {
-                    if (!seen.has(j)) { seen.add(j); next.push(j); }
-                }
+        });
+        if (!reduceMotion) {
+            for (let k = 0; k < 10; k++) {
+                const a = rand(0, Math.PI * 2), v = rand(1, 4) * this.dpr;
+                this.addSparkle(x, y, { vx: Math.cos(a) * v, vy: Math.sin(a) * v, size: rand(5, 11), max: rand(30, 55) });
             }
-            ring = next;
         }
     }
 
@@ -627,7 +725,8 @@ function addPaneFrame() {
         const small = W < 520;
         const I = small ? 4 : 6;
         const fillet = small ? 6 : 8;
-        const rise = (W / 2 - I) * (small ? 1.2 : 1.15);
+        /* A wide pane gets a flatter point so the text isn't pushed far down. */
+        const rise = (W / 2 - I) * (small ? 1.2 : 0.42);
         const spring = I + rise;
         const outerArch = arch(W, H, I, spring, rise);
         const innerArch = arch(W, H, I, spring, rise, fillet);
