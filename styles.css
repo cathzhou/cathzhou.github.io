@@ -18,13 +18,13 @@
 
 html {
     scrollbar-gutter: stable;
-    background-color: #1b2a6b;
+    background-color: #2733d6;
 }
 
 body {
     font-family: 'Newsreader', Georgia, 'Times New Roman', serif;
     color: var(--text-color);
-    background-color: #1b2a6b;
+    background-color: #2733d6;
     font-size: 19px;
     line-height: 1.35;
     min-height: 100vh;
@@ -190,7 +190,7 @@ a {
     z-index: 0;
     display: block;
     cursor: crosshair;
-    background: #1b2a6b;
+    background: #2733d6;
     touch-action: manipulation;
 }
 
@@ -201,15 +201,67 @@ a {
     min-height: 0;
     margin: 6vh auto;
     padding: 4.2rem 2.6rem 2.2rem;
-    background: #fbf8f1;
-    border: 7px solid var(--lead);
+    border: 11px solid transparent;
     border-radius: 50% 50% 10px 10px / 150px 150px 10px 10px;
+    background:
+        linear-gradient(160deg, #fffbf2 0%, #fdf7ff 55%, #f4fbff 100%) padding-box,
+        repeating-conic-gradient(from var(--spin) at 50% 45%,
+            #e0245e 0 8deg, #141018 8deg 9deg,
+            #ff8a1f 9deg 17deg, #141018 17deg 18deg,
+            #ffd23f 18deg 26deg, #141018 26deg 27deg,
+            #1fa84f 27deg 35deg, #141018 35deg 36deg,
+            #13b9c9 36deg 44deg, #141018 44deg 45deg,
+            #2b3fe0 45deg 53deg, #141018 53deg 54deg,
+            #8a3cf0 54deg 62deg, #141018 62deg 63deg,
+            #ff5fa2 63deg 71deg, #141018 71deg 72deg) border-box;
     box-shadow:
-        inset 0 0 0 2px #fff,
-        inset 0 0 0 5px color-mix(in srgb, var(--lead) 18%, transparent),
-        0 24px 70px rgba(5, 5, 20, 0.55);
+        0 0 0 3px var(--lead),
+        inset 0 0 0 3px var(--lead),
+        inset 0 0 0 5px #fff,
+        0 0 60px rgba(255, 225, 150, 0.45),
+        0 24px 70px rgba(5, 5, 20, 0.5);
     overflow: hidden;
     isolation: isolate;
+    animation: rim-turn 60s linear infinite;
+}
+
+@property --spin {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+}
+
+@keyframes rim-turn {
+    to { --spin: 360deg; }
+}
+
+.twinkles {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.twinkles span {
+    position: absolute;
+    width: var(--s);
+    height: var(--s);
+    margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2);
+    background: var(--c);
+    clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%);
+    filter: drop-shadow(0 0 4px var(--c));
+    animation: twinkle 3.5s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+    0%, 100% { transform: scale(0.2) rotate(0deg); opacity: 0; }
+    45% { transform: scale(1) rotate(45deg); opacity: 0.95; }
+    60% { transform: scale(0.7) rotate(60deg); opacity: 0.6; }
+}
+
+.highlight-link:hover,
+.contact-link:hover {
+    text-shadow: 0 0 10px color-mix(in srgb, var(--jewel, var(--accent)) 55%, transparent);
 }
 
 .content {
@@ -349,7 +401,7 @@ a {
     height: var(--s);
     border-radius: 50%;
     background: radial-gradient(circle, var(--c) 0%, transparent 65%);
-    opacity: 0.1;
+    opacity: 0.14;
     filter: blur(24px);
     animation: drift var(--d) ease-in-out infinite alternate;
 }
@@ -361,6 +413,8 @@ a {
 
 @media (prefers-reduced-motion: reduce) {
     .light-field span { animation: none; }
+    .container { animation: none; }
+    .twinkles span { animation: none; opacity: 0.7; transform: scale(0.8); }
     .rose { transition: none; }
 }
 
@@ -368,7 +422,7 @@ a {
     .container {
         margin: 14px;
         padding: 3.6rem 1.3rem 1.6rem;
-        border-width: 5px;
+        border-width: 8px;
         border-radius: 50% 50% 8px 8px / 90px 90px 8px 8px;
     }
 
