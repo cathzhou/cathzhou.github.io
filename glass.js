@@ -125,6 +125,9 @@ class GlassWindow {
 
         const small = window.innerWidth < 600;
         const cx = w / 2, cy = h * 0.42;
+        const pane = document.querySelector('.container')?.getBoundingClientRect();
+        this.clearHalf = ((pane ? pane.width / 2 : 340) + (small ? 0 : 24)) * dpr;
+        this.clearFade = (small ? 40 : 150) * dpr;
         this.center = [cx, cy];
         this.rim = (Math.hypot(w, h) / 2) * (small ? 0.96 : 0.9);
         const flowers = this.flowers = this.layoutFlowers(w, h, small);
@@ -245,6 +248,9 @@ class GlassWindow {
             g.fill();
         }
 
+        g.fillStyle = this.clearGradient(g, 'rgba(253,250,244,', 0.91);
+        g.fillRect(0, 0, w, h);
+
         g.globalCompositeOperation = 'overlay';
         g.globalAlpha = 0.28;
         g.fillStyle = g.createPattern(this.noise, 'repeat');
@@ -282,6 +288,24 @@ class GlassWindow {
             l.lineTo(cx + Math.cos(a) * far, cy + Math.sin(a) * far);
         }
         l.stroke();
+        l.globalCompositeOperation = 'destination-out';
+        l.fillStyle = this.clearGradient(l, 'rgba(0,0,0,', 0.88);
+        l.fillRect(0, 0, w, h);
+        l.globalCompositeOperation = 'source-over';
+    }
+
+    /* The panes behind the text are clear glass, fading into color toward the sides. */
+    clearGradient(c, rgb, alpha) {
+        const mid = this.w / 2, half = this.clearHalf, fade = this.clearFade;
+        const x0 = Math.max(0, mid - half - fade), x1 = Math.min(this.w, mid + half + fade);
+        const grad = c.createLinearGradient(x0, 0, x1, 0);
+        const span = x1 - x0 || 1;
+        const inner = Math.min(0.49, (mid - half - x0) / span);
+        grad.addColorStop(0, `${rgb}0)`);
+        grad.addColorStop(inner, `${rgb}${alpha})`);
+        grad.addColorStop(1 - inner, `${rgb}${alpha})`);
+        grad.addColorStop(1, `${rgb}0)`);
+        return grad;
     }
 
     cellBounds(i) {
@@ -326,7 +350,8 @@ class GlassWindow {
                 const i = Math.floor(Math.random() * (cc.length / 2));
                 x = cc[i * 2]; y = cc[i * 2 + 1];
             }
-            if (x >= 0 && y >= 0 && x <= this.w && y <= this.h) this.addSparkle(x, y);
+            const behindText = Math.abs(x - this.w / 2) < this.clearHalf;
+            if (!behindText && x >= 0 && y >= 0 && x <= this.w && y <= this.h) this.addSparkle(x, y);
         }
     }
 
@@ -530,20 +555,6 @@ function addRose() {
 function addCastLight() {
     const pane = document.querySelector('.container');
     if (!pane) return;
-    const field = document.createElement('div');
-    field.className = 'light-field';
-    field.setAttribute('aria-hidden', 'true');
-    for (let i = 0; i < 5; i++) {
-        const spot = document.createElement('span');
-        spot.style.setProperty('--c', JEWELS[(i * 3) % JEWELS.length]);
-        spot.style.setProperty('--x', `${rand(-20, 70)}%`);
-        spot.style.setProperty('--y', `${rand(-10, 80)}%`);
-        spot.style.setProperty('--s', `${rand(260, 420)}px`);
-        spot.style.setProperty('--d', `${rand(24, 40)}s`);
-        spot.style.animationDelay = `${-rand(0, 40)}s`;
-        field.appendChild(spot);
-    }
-    pane.prepend(field);
 
     const twinkles = document.createElement('div');
     twinkles.className = 'twinkles';

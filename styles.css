@@ -6,10 +6,10 @@
 
 :root {
     --accent: #0b6b45;
-    --text-color: #666;
+    --text-color: #3f3a36;
     --strong-color: #000;
-    --muted: #b5b5b5;
-    --mono-color: #4d4d4d;
+    --muted: #7d746c;
+    --mono-color: #2f2b28;
     --rule: #e6e6e6;
     --lead: #2a2420;
     --ruby: #9b1d3a;
@@ -194,45 +194,14 @@ a {
     touch-action: manipulation;
 }
 
-/* The clear pane in the middle of the window. */
+/* The text sits on clear glass drawn into the window itself. */
 .container {
     position: relative;
     z-index: 1;
     min-height: 0;
     margin: 6vh auto;
-    padding: 4.2rem 2.6rem 2.2rem;
-    border: 11px solid transparent;
-    border-radius: 50% 50% 10px 10px / 150px 150px 10px 10px;
-    background:
-        linear-gradient(160deg, #fffbf2 0%, #fdf7ff 55%, #f4fbff 100%) padding-box,
-        repeating-conic-gradient(from var(--spin) at 50% 45%,
-            #e0245e 0 8deg, #141018 8deg 9deg,
-            #ff8a1f 9deg 17deg, #141018 17deg 18deg,
-            #ffd23f 18deg 26deg, #141018 26deg 27deg,
-            #1fa84f 27deg 35deg, #141018 35deg 36deg,
-            #13b9c9 36deg 44deg, #141018 44deg 45deg,
-            #2b3fe0 45deg 53deg, #141018 53deg 54deg,
-            #8a3cf0 54deg 62deg, #141018 62deg 63deg,
-            #ff5fa2 63deg 71deg, #141018 71deg 72deg) border-box;
-    box-shadow:
-        0 0 0 3px var(--lead),
-        inset 0 0 0 3px var(--lead),
-        inset 0 0 0 5px #fff,
-        0 0 60px rgba(255, 225, 150, 0.45),
-        0 24px 70px rgba(5, 5, 20, 0.5);
-    overflow: hidden;
-    isolation: isolate;
-    animation: rim-turn 60s linear infinite;
-}
-
-@property --spin {
-    syntax: '<angle>';
-    inherits: false;
-    initial-value: 0deg;
-}
-
-@keyframes rim-turn {
-    to { --spin: 360deg; }
+    padding: 2.6rem 2.6rem 2.2rem;
+    text-shadow: 0 0 12px rgba(255, 252, 245, 0.9);
 }
 
 .twinkles {
@@ -326,7 +295,7 @@ a {
 }
 
 .description-text {
-    color: #6f6a62;
+    color: #4f4943;
     border: 0 solid var(--lead);
     border-left-width: 0;
     padding: 0 0.8em;
@@ -385,35 +354,7 @@ a {
     background: color-mix(in srgb, var(--gold) 45%, transparent);
 }
 
-.light-field {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    overflow: hidden;
-    pointer-events: none;
-}
-
-.light-field span {
-    position: absolute;
-    left: var(--x);
-    top: var(--y);
-    width: var(--s);
-    height: var(--s);
-    border-radius: 50%;
-    background: radial-gradient(circle, var(--c) 0%, transparent 65%);
-    opacity: 0.14;
-    filter: blur(24px);
-    animation: drift var(--d) ease-in-out infinite alternate;
-}
-
-@keyframes drift {
-    from { transform: translate(-40px, -30px) scale(0.9); }
-    to { transform: translate(60px, 50px) scale(1.1); }
-}
-
 @media (prefers-reduced-motion: reduce) {
-    .light-field span { animation: none; }
-    .container { animation: none; }
     .twinkles span { animation: none; opacity: 0.7; transform: scale(0.8); }
     .rose { transition: none; }
 }
@@ -421,9 +362,7 @@ a {
 @media (max-width: 520px) {
     .container {
         margin: 14px;
-        padding: 3.6rem 1.3rem 1.6rem;
-        border-width: 8px;
-        border-radius: 50% 50% 8px 8px / 90px 90px 8px 8px;
+        padding: 2rem 1.3rem 1.6rem;
     }
 
     .header-links {
