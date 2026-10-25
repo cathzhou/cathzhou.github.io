@@ -19,6 +19,7 @@
     </script>
 </head>
 <body>
+    <canvas class="glass-bg" aria-hidden="true"></canvas>
     <div class="container">
         <main class="content">
             <nav class="header-links">
@@ -77,8 +78,14 @@
                 <span class="separator">/</span>
                 <a href="/files/catherine-zhou-resume.pdf" class="contact-link" target="_blank">RESUME</a>
             </div>
-
-            <div class="glass-transom"><canvas aria-hidden="true"></canvas></div>
+            <div class="glass-controls">
+                <span>Click the glass around the page</span>
+                <span class="glass-buttons">
+                    <button type="button" data-action="relead">RE-LEAD</button>
+                    <span class="separator">/</span>
+                    <button type="button" data-action="reset">RESET</button>
+                </span>
+            </div>
         </main>
     </div>
     <script src="/script.js"></script>

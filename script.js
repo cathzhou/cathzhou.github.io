@@ -1,6 +1,6 @@
 const JEWEL_TEXT = ['#9b1d3a', '#2340a0', '#0b6b45', '#a8650a', '#5b2a86', '#0f6f7a', '#b0345c'];
 
-document.querySelectorAll('.highlight-link, .list a.item-title').forEach((link, i) => {
+document.querySelectorAll('.highlight-link, .list a.item-title, .contact-link').forEach((link, i) => {
     link.style.setProperty('--jewel', JEWEL_TEXT[i % JEWEL_TEXT.length]);
 });
 
