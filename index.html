@@ -57,9 +57,22 @@
                 <a href="/files/catherine-zhou-resume.pdf" class="contact-link" target="_blank">RESUME</a>
             </div>
 
-            <img class="footer-photo" src="/img/loaf.png" alt="A cat shaped like a loaf of bread">
+            <figure class="glass-window">
+                <canvas data-image="/img/loaf.png" role="img" aria-label="A stained glass window of a cat shaped like a loaf of bread"></canvas>
+                <figcaption class="glass-controls">
+                    <span>Click the glass to recolor it</span>
+                    <span class="glass-buttons">
+                        <button type="button" data-action="relead">RE-LEAD</button>
+                        <span class="separator">/</span>
+                        <button type="button" data-action="reset">RESET</button>
+                        <span class="separator">/</span>
+                        <button type="button" data-action="peek">HOLD TO PEEK</button>
+                    </span>
+                </figcaption>
+            </figure>
         </main>
     </div>
     <script src="/script.js"></script>
+    <script type="module" src="/glass.js"></script>
 </body>
 </html>

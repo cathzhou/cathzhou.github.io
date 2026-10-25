@@ -11,7 +11,6 @@
     --muted: #b5b5b5;
     --mono-color: #4d4d4d;
     --rule: #e6e6e6;
-    --photo-bg: #e1d9d1;
 }
 
 html {
@@ -73,13 +72,18 @@ a {
 }
 
 .highlight-link {
-    color: var(--accent);
+    color: var(--jewel, var(--accent));
+    background-image: linear-gradient(color-mix(in srgb, var(--jewel, var(--accent)) 16%, transparent), color-mix(in srgb, var(--jewel, var(--accent)) 16%, transparent));
+    background-size: 100% 0;
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    transition: background-size 0.25s ease, opacity 0.2s ease;
     cursor: pointer;
     transition: opacity 0.2s ease;
 }
 
 .highlight-link:hover {
-    opacity: 0.7;
+    background-size: 100% 100%;
 }
 
 .highlight-link.active {
@@ -89,7 +93,9 @@ a {
 }
 
 .description-text {
-    color: var(--muted);
+    color: #9a9a9a;
+    border-left: 3px solid var(--jewel, var(--accent));
+    padding-left: 0.75em;
     line-height: 1.25;
     max-height: 0;
     overflow: hidden;
@@ -104,7 +110,7 @@ a {
 }
 
 .description-text a {
-    color: var(--accent);
+    color: var(--jewel, var(--accent));
     transition: opacity 0.2s ease;
 }
 
@@ -136,7 +142,7 @@ a {
 }
 
 .list a.item-title {
-    color: var(--accent);
+    color: var(--jewel, var(--accent));
     transition: opacity 0.2s ease;
 }
 
@@ -176,12 +182,111 @@ a {
     margin: 0 0.2rem;
 }
 
-.footer-photo {
+.container {
+    position: relative;
+    z-index: 1;
+}
+
+.rose {
+    display: inline-flex;
+    vertical-align: -2px;
+    margin-right: 0.4em;
+    transition: transform 1.2s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.header-link:hover .rose {
+    transform: rotate(180deg);
+}
+
+.section-label::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 0.6em;
+    background: conic-gradient(#9b1d3a 0 25%, #1f3fa6 0 50%, #0f7a52 0 75%, #d9930d 0);
+    outline: 1.5px solid #2a2420;
+    vertical-align: 0;
+}
+
+.glass-window {
+    margin: 2.6em auto 0;
     width: 100%;
-    max-height: 40vh;
-    object-fit: contain;
-    background-color: var(--photo-bg);
+    max-width: 440px;
+}
+
+.glass-window canvas,
+.glass-transom canvas {
+    display: block;
+    width: 100%;
+    cursor: crosshair;
+    touch-action: manipulation;
+    filter: drop-shadow(0 10px 24px rgba(60, 40, 20, 0.18));
+}
+
+.glass-transom {
     margin-top: 2.6em;
+}
+
+.glass-transom canvas {
+    height: 64px;
+}
+
+.glass-controls {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.9em;
+}
+
+.glass-buttons button {
+    font: inherit;
+    color: var(--mono-color);
+    background: none;
+    border: 0;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: color 0.2s ease;
+}
+
+.glass-buttons button:hover {
+    color: #9b1d3a;
+}
+
+.light-field {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.light-field span {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    width: var(--s);
+    height: var(--s);
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--c) 0%, transparent 65%);
+    opacity: 0.07;
+    filter: blur(30px);
+    animation: drift var(--d) ease-in-out infinite alternate;
+}
+
+@keyframes drift {
+    from { transform: translate(-6vw, -4vh) scale(0.9); }
+    to { transform: translate(8vw, 6vh) scale(1.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .light-field span { animation: none; }
+    .rose { transition: none; }
 }
 
 @media (max-width: 520px) {
