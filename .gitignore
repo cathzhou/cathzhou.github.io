@@ -1,13 +1,1 @@
 .DS_Store
-
-# output
-public
-
-# themes
-themes/*
-!themes/.gitkeep
-!themes/dream
-
-# hugo
-resources
-.hugo_build.lock
