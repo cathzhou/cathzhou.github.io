@@ -345,7 +345,91 @@ class GlassWindow {
     }
 
     insideRim(x, y) {
-        return x >= 0 && y >= 0 && x <= this.w && y <= this.h;
+        return x >= 0 && y >= 0 && x <= this.w && y <= this.h && !this.inPane(x, y);
+    }
+
+    inPane(x, y) {
+        const f = window.__paneFrame;
+        if (!f || !f.outer) return false;
+        const r = f.pane.getBoundingClientRect();
+        if (!this.outerPath || this.outerFor !== f.version) { this.outerPath = new Path2D(f.outer); this.outerFor = f.version; }
+        return this.ctx.isPointInPath(this.outerPath, x / this.dpr - r.left, y / this.dpr - r.top);
+    }
+
+    /* The clear pane is cut into a few big pieces of pale glass, leaded like the rest of the window. */
+    renderPane() {
+        const f = window.__paneFrame;
+        if (!f || !f.inner) return null;
+        const key = `${f.version}:${this.dpr}:${this.w}`;
+        if (this.paneKey === key) return this.paneCanvas;
+        this.paneKey = key;
+        const { dpr } = this;
+        const W = f.W, H = f.H;
+        const c = this.paneCanvas = this.paneCanvas || document.createElement('canvas');
+        c.width = Math.ceil(W * dpr); c.height = Math.ceil(H * dpr);
+        const g = c.getContext('2d');
+        g.scale(dpr, dpr);
+        const inner = new Path2D(f.inner);
+        g.save();
+        g.clip(inner);
+        const cell = f.small ? 120 : 190;
+        const seeds = [];
+        for (let y = cell * 0.4; y < H + cell; y += cell * 0.8) {
+            for (let x = cell * 0.4; x < W + cell; x += cell) seeds.push([x + rand(-0.35, 0.35) * cell, y + rand(-0.35, 0.35) * cell]);
+        }
+        const vor = Delaunay.from(seeds).voronoi([0, 0, W, H]);
+        seeds.forEach((_, i) => {
+            g.beginPath();
+            vor.renderCell(i, g);
+            const hue = pick([44, 48, 52, 200, 210, 40, 330]);
+            g.fillStyle = `hsla(${hue + rand(-6, 6)} ${rand(40, 70)}% ${rand(94, 97.5)}% / 0.92)`;
+            g.fill();
+        });
+        g.globalCompositeOperation = 'overlay';
+        g.globalAlpha = 0.18;
+        g.fillStyle = g.createPattern(this.noise, 'repeat');
+        g.fillRect(0, 0, W, H);
+        g.globalAlpha = 0.3;
+        g.fillStyle = g.createPattern(this.ripples, 'repeat');
+        g.fillRect(0, 0, W, H);
+        g.globalCompositeOperation = 'source-over';
+        g.globalAlpha = 1;
+        const lead = new Path2D();
+        vor.render(lead);
+        g.lineJoin = 'round';
+        g.strokeStyle = 'rgba(20, 16, 24, 0.07)';
+        g.lineWidth = 6;
+        g.stroke(lead);
+        g.strokeStyle = 'rgba(20, 16, 24, 0.24)';
+        g.lineWidth = 1.4;
+        g.stroke(lead);
+        g.restore();
+        return c;
+    }
+
+    drawPane(lx, ly) {
+        const f = window.__paneFrame;
+        const c = this.renderPane();
+        if (!c) return;
+        const { ctx, dpr } = this;
+        const r = f.pane.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > this.h / dpr) return;
+        const px = r.left * dpr, py = r.top * dpr;
+        ctx.drawImage(c, px, py);
+        /* The sun falls across the pane like the rest of the glass. */
+        ctx.save();
+        ctx.translate(px, py);
+        ctx.scale(dpr, dpr);
+        ctx.clip(new Path2D(f.inner));
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.globalCompositeOperation = 'screen';
+        const R = Math.max(this.w, this.h) * 0.22;
+        const glow = ctx.createRadialGradient(lx, ly, 0, lx, ly, R);
+        glow.addColorStop(0, 'rgba(255, 236, 170, 0.5)');
+        glow.addColorStop(1, 'rgba(255, 236, 170, 0)');
+        ctx.fillStyle = glow;
+        ctx.fillRect(lx - R, ly - R, R * 2, R * 2);
+        ctx.restore();
     }
 
     addSparkle(x, y, opts = {}) {
@@ -458,6 +542,7 @@ class GlassWindow {
         }
         ctx.globalCompositeOperation = 'source-over';
         ctx.drawImage(this.leadLayer, 0, 0);
+        this.drawPane(lx, ly);
         this.drawSparkles();
     }
 
@@ -501,7 +586,6 @@ class GlassWindow {
             this.light = { x: x / this.w, y: y / this.h, active: true };
             this.hover = e.target === this.canvas && this.insideRim(x, y) ? this.delaunay.find(x, y) : -1;
             if (reduceMotion) this.sparkles = [];
-            frame?.light(e.clientX, e.clientY);
         });
         document.addEventListener('pointerleave', () => { this.hover = -1; });
         this.canvas.addEventListener('click', (e) => {
@@ -589,19 +673,31 @@ function addRose() {
 /* The text sits on a clear pane shaped like a pointed arch, rimmed in lead with a fillet of gold glass. */
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
-/* A pointed arch from two circular arcs springing at `spring`; `d` insets it as a parallel line. */
+/* A pointed arch: sides rise straight, then curve in to meet at a point; `d` insets it as a parallel line. */
 function arch(W, H, I, spring, rise, d = 0) {
-    const a = W / 2 - I;
-    const r = (a * a + rise * rise) / (2 * a);
-    const cl = I + r, rr = r - d;
+    const a = W / 2 - I - d;
+    const rs = rise - d * 1.25;
     const mid = W / 2;
-    const apex = spring - Math.sqrt(rr * rr - (mid - cl) ** 2);
+    const apex = spring - rs;
     const xl = I + d, xr = W - I - d, bottom = H - I - d;
+    /* Height above the springing line at fraction u of the way from the side to the middle. */
+    const lift = (u) => rs * (0.58 * Math.sqrt(1 - (1 - u) ** 2) + 0.42 * u);
     const f = (n) => n.toFixed(1);
+    const N = 48;
+    let path = `M${f(xl)} ${f(bottom)} L${f(xl)} ${f(spring)}`;
+    for (let i = 1; i <= N; i++) { const u = i / N; path += ` L${f(xl + a * u)} ${f(spring - lift(u))}`; }
+    for (let i = N - 1; i >= 0; i--) { const u = i / N; path += ` L${f(xr - a * u)} ${f(spring - lift(u))}`; }
+    path += ` L${f(xr)} ${f(bottom)} Z`;
     return {
-        path: `M${f(xl)} ${f(bottom)} L${f(xl)} ${f(spring)} A${f(rr)} ${f(rr)} 0 0 1 ${f(mid)} ${f(apex)} A${f(rr)} ${f(rr)} 0 0 1 ${f(xr)} ${f(spring)} L${f(xr)} ${f(bottom)} Z`,
+        path,
         /* Half the clear width at height y. */
-        halfWidth: (y) => (y >= spring ? mid - xl : y <= apex ? 0 : mid - (cl - Math.sqrt(rr * rr - (spring - y) ** 2))),
+        halfWidth: (y) => {
+            if (y >= spring) return a;
+            if (y <= apex) return 0;
+            let lo = 0, hi = 1;
+            for (let k = 0; k < 24; k++) { const m = (lo + hi) / 2; if (lift(m) < spring - y) lo = m; else hi = m; }
+            return a * (1 - lo);
+        },
         apex,
     };
 }
@@ -616,11 +712,10 @@ function el(tag, attrs, parent) {
 function addPaneFrame() {
     const pane = document.querySelector('.container');
     if (!pane) return null;
-    const glass = document.createElement('div');
-    glass.className = 'pane-glass';
     const svg = el('svg', { class: 'pane-frame', 'aria-hidden': 'true' });
-    pane.prepend(glass, svg);
+    pane.prepend(svg);
     let last = '';
+    const geom = { pane, version: 0 };
 
     const draw = () => {
         const W = pane.clientWidth, H = pane.clientHeight;
@@ -628,7 +723,7 @@ function addPaneFrame() {
         const I = small ? 4 : 6;
         const fillet = small ? 6 : 8;
         /* A wide pane gets a flatter point so the text isn't pushed far down. */
-        const rise = (W / 2 - I) * (small ? 1.2 : 0.42);
+        const rise = (W / 2 - I) * (small ? 1.2 : 0.5);
         const spring = I + rise;
         const outerArch = arch(W, H, I, spring, rise);
         const innerArch = arch(W, H, I, spring, rise, fillet);
@@ -655,7 +750,7 @@ function addPaneFrame() {
         svg.setAttribute('width', W);
         svg.setAttribute('height', H);
         svg.replaceChildren();
-        glass.style.clipPath = `path('${innerArch.path}')`;
+        Object.assign(geom, { W, H, small, inner: innerArch.path, outer: outerArch.path, version: geom.version + 1 });
         /* The rim is a ring of gold glass pieces, alternating pale and deep, each joined by lead. */
         const midArch = arch(W, H, I, spring, rise, fillet / 2).path;
         el('path', { d: `${outerArch.path} ${innerArch.path}`, 'fill-rule': 'evenodd', fill: '#f6dc8a' }, svg);
@@ -673,14 +768,7 @@ function addPaneFrame() {
     new ResizeObserver(draw).observe(pane);
     draw();
 
-    return {
-        /* Sunlight from the cursor falls across the clear pane too. */
-        light(clientX, clientY) {
-            const r = pane.getBoundingClientRect();
-            glass.style.setProperty('--lx', `${clientX - r.left}px`);
-            glass.style.setProperty('--ly', `${clientY - r.top}px`);
-        },
-    };
+    return geom;
 }
 
 /* A thin leaded strip of glass under each section heading. */
@@ -702,6 +790,7 @@ function addCames() {
 
 addRose();
 const frame = addPaneFrame();
+window.__paneFrame = frame;
 addCames();
 
 const bg = document.querySelector('.glass-bg');
